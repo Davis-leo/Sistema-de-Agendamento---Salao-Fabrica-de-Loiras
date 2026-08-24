@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Model;
 use App\Entities\Unit;
 
@@ -54,4 +55,12 @@ class UnitModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+
+    public function findorFail(int | string $id): object{
+
+        $row = $this ->find($id);
+
+        return $row ?? throw new PageNotFoundException("Registro {$id} não encontrado");
+    }
 }

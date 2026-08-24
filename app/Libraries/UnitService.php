@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use App\Entities\Unit;
 use App\Models\UnitModel;
 
 class UnitService extends MyBaseService
@@ -19,14 +20,15 @@ class UnitService extends MyBaseService
 
         if (empty($units)) {
 
-            return "<div class='text-info'>Não há dados para serem exibidos</div>";
+            return self::TEXT_FOR_NO_DATA;
         }
 
-        $this->htmlTable->setHeading('Nome', 'E-mail', 'Telefone', 'Início', 'Fim', 'Criado');
+        $this->htmlTable->setHeading('Ações', 'Nome', 'E-mail', 'Telefone', 'Início', 'Fim', 'Criado');
 
         foreach ($units as $unit) {
 
             $this->htmlTable->addRow([
+                $this->renderBtnActions($unit),
                 $unit->name,
                 $unit->email,
                 $unit->phone,
@@ -37,5 +39,28 @@ class UnitService extends MyBaseService
         }
 
         return $this->htmlTable->generate();
+    }
+
+    /**
+     * Renderiza os dropdowns com as ações possíveis para cada registro
+     * @param Unit $unit
+     * @return string
+     */
+    private function renderBtnActions(Unit $unit): string
+    {
+
+
+        $btnActions = '<div class="btn-group dropup">';
+        $btnActions .= '<button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        Ações
+                        </button>';
+        $btnActions .= '<ul class="dropdown-menu">';
+        $btnActions .= anchor(route_to('units.edit', $unit->id), '<i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i>Editar', ['class' => 'dropdown-item']);
+        $btnActions .= '<li><a class="dropdown-item" href="#">Another action</a></li>';
+        $btnActions .= '<li><a class="dropdown-item" href="#">Something else here</a></li>';
+        $btnActions .= '</ul>
+                    </div>';
+
+        return $btnActions;
     }
 }

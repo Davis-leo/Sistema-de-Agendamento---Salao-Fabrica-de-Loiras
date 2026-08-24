@@ -20,6 +20,7 @@ use Psr\Log\LoggerInterface;
  */
 abstract class BaseController extends Controller
 {
+    protected $helpers = ['form'];
     /**
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
@@ -41,5 +42,24 @@ abstract class BaseController extends Controller
 
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
+    }
+
+
+    /**
+     * Valida se a requisição é realmente do tipo informado: post/put/delete
+     * @param string $method
+     * @return boolean
+     */
+    protected function checkMethod(string $method): bool
+    {
+
+        $method = strtolower($method);
+
+        if (!$this->request->is($method)) {
+
+            return $this->response->setStatusCode(405)->setBody('Method Not Allowed');
+        }
+
+        return true;
     }
 }

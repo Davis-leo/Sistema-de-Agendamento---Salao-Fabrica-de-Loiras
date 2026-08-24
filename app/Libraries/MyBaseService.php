@@ -12,6 +12,10 @@ class MyBaseService
     protected HTMLTable $htmlTable;
 
 
+    /** Elemento HTML a ser exibido quando não houver dados para apresentar */
+    protected const TEXT_FOR_NO_DATA = '<div class="text-info">Não há dados para serem exibidos</div>';
+
+
     public function __construct()
     {
         $this->htmlTable = Factories::class(HtmlTable::class);
