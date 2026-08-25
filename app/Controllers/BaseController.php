@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use CodeIgniter\Controller;
+use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -20,7 +21,7 @@ use Psr\Log\LoggerInterface;
  */
 abstract class BaseController extends Controller
 {
-    protected $helpers = ['form'];
+    protected $helpers = ['form', 'general'];
     /**
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
@@ -48,6 +49,7 @@ abstract class BaseController extends Controller
     /**
      * Valida se a requisição é realmente do tipo informado: post/put/delete
      * @param string $method
+     * @throws PageNotFoundException
      * @return boolean
      */
     protected function checkMethod(string $method): bool
@@ -57,9 +59,23 @@ abstract class BaseController extends Controller
 
         if (!$this->request->is($method)) {
 
-            return $this->response->setStatusCode(405)->setBody('Method Not Allowed');
+            throw new PageNotFoundException("Página não encontrada");
         }
 
         return true;
+    }
+
+
+    /**
+     * Remove do post a posição '_method' do spoofing, pois estamos trabalhando com roteamento RESTful.
+     * @return array
+     */
+    protected function clearRequest(): array {
+
+        $data = $this->request->getPost();
+
+        unset($data['_method']);
+
+        return $data;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Controllers\Super;
 
 use App\Controllers\BaseController;
+use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\View\RendererInterface;
 use App\models\UnitModel;
 use CodeIgniter\Config\Factories;
@@ -10,7 +11,7 @@ use App\Libraries\UnitService;
 
 class UnitsController extends BaseController
 {
-    
+
     /** @var UnitService */
     private UnitService $unitService;
 
@@ -35,11 +36,11 @@ class UnitsController extends BaseController
             'title' => 'Unidades',
             'units' => $this->unitService->renderUnits()
         ];
-    
+
         return view('Back/Units/index', $data);
     }
 
-     /**
+    /**
      * Renderiza a view para gerenciar as unidades
      * 
      * @param integer $id
@@ -49,10 +50,43 @@ class UnitsController extends BaseController
     {
 
         $data = [
-            'title' => 'Editar unidade',
-            'unit'  => $this->unitModel->findorFail($id)
+            'title'         => 'Editar unidade',
+            'unit'          => $unit = $this->unitModel->findorFail($id),
+            'timesInterval' => $this->unitService->renderTimesInterval($unit->servicetime)
         ];
-    
+
         return view('Back/Units/edit', $data);
+    }
+
+    /**
+     * Processa a atualização do registro na base de dados
+     * @param integer $id
+     * @return RedirectResponse
+     */
+    public function update(int $id)
+    {
+        $this->checkMethod('put');
+
+        $unit = $this->unitModel->findorFail($id);
+
+        $unit->fill($this->clearRequest());
+
+        if(!$unit->hasChanged()){
+
+            return redirect()->back()->with('info', 'Não há dados para atualizar.');
+        }
+
+        $success = $this->unitModel->save($unit);
+
+        if(!$success){
+
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', 'Verifique os erros e tente novamente.')
+                ->with('errorsValidation', $this->unitModel->errors());
+
+        }
+
+        return redirect()->route('units')->with('success', 'Unidade atualizada com sucesso!');
     }
 }
