@@ -31,7 +31,7 @@ class UnitService extends MyBaseService
             return self::TEXT_FOR_NO_DATA;
         }
 
-        $this->htmlTable->setHeading('Ações', 'Nome', 'E-mail', 'Telefone', 'Início', 'Fim', 'Criado');
+        $this->htmlTable->setHeading('Ações', 'Nome', 'E-mail', 'Telefone', 'Início', 'Fim', 'Situação', 'Criado');
 
         foreach ($units as $unit) {
 
@@ -42,6 +42,7 @@ class UnitService extends MyBaseService
                 $unit->phone,
                 $unit->starttime,
                 $unit->endtime,
+                $unit->status(),
                 $unit->created_at
             ]);
         }
@@ -82,9 +83,24 @@ class UnitService extends MyBaseService
                         Ações
                         </button>';
         $btnActions .= '<ul class="dropdown-menu">';
-        $btnActions .= anchor(route_to('units.edit', $unit->id), '<i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i>Editar', ['class' => 'dropdown-item']);
-        $btnActions .= '<li><a class="dropdown-item" href="#">Another action</a></li>';
-        $btnActions .= '<li><a class="dropdown-item" href="#">Something else here</a></li>';
+        $btnActions .= anchor(route_to('units.edit', $unit->id), 'Editar', ['class' => 'dropdown-item']);
+        $btnActions .= view_cell(
+            library: 'ButtonsCell::action', 
+            params: [
+                'route'       => route_to('units.action', $unit->id),
+                'text_action' => $unit->textToAction(),
+                'activated'   => $unit->isActivated(),
+                'btn_class'   => 'dropdown-item py2'
+            ]
+        );
+        $btnActions .= view_cell(
+            library: 'ButtonsCell::destroy', 
+            params: [
+                'route'       => route_to('units.destroy', $unit->id),
+                'btn_class'   => 'dropdown-item py2'
+            ]
+        );
+
         $btnActions .= '</ul>
                     </div>';
 

@@ -3,6 +3,7 @@
 namespace App\Controllers\Super;
 
 use App\Controllers\BaseController;
+use App\Entities\Unit;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\View\RendererInterface;
 use App\models\UnitModel;
@@ -40,6 +41,45 @@ class UnitsController extends BaseController
         return view('Back/Units/index', $data);
     }
 
+
+    /**
+     * Renderiza a view para criar as unidades
+     * 
+     * @return RendererInterface
+     */
+    public function new()
+    {
+        $data = [
+            'title' => 'Criar unidade',
+            'unit' => new Unit(),
+            'timesInterval' => $this->unitService->renderTimesInterval()
+        ];
+
+        return view('Back/Units/new', $data);
+    }
+
+    /**
+     * Processa a criação do registro na base de dados
+     * @return RedirectResponse
+     */
+    public function create()
+    {
+        $this->checkMethod('post');
+
+        $unit = new Unit($this->clearRequest());
+
+        if (!$this->unitModel->insert($unit)) {
+
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', 'Verifique os erros e tente novamente.')
+                ->with('errorsValidation', $this->unitModel->errors());
+
+        }
+
+        return redirect()->route('units')->with('success', 'Unidade criada com sucesso!');
+    }
+
     /**
      * Renderiza a view para gerenciar as unidades
      * 
@@ -50,8 +90,8 @@ class UnitsController extends BaseController
     {
 
         $data = [
-            'title'         => 'Editar unidade',
-            'unit'          => $unit = $this->unitModel->findorFail($id),
+            'title' => 'Editar unidade',
+            'unit' => $unit = $this->unitModel->findorFail($id),
             'timesInterval' => $this->unitService->renderTimesInterval($unit->servicetime)
         ];
 
@@ -71,14 +111,14 @@ class UnitsController extends BaseController
 
         $unit->fill($this->clearRequest());
 
-        if(!$unit->hasChanged()){
+        if (!$unit->hasChanged()) {
 
             return redirect()->back()->with('info', 'Não há dados para atualizar.');
         }
 
         $success = $this->unitModel->save($unit);
 
-        if(!$success){
+        if (!$success) {
 
             return redirect()->back()
                 ->withInput()
@@ -88,5 +128,41 @@ class UnitsController extends BaseController
         }
 
         return redirect()->route('units')->with('success', 'Unidade atualizada com sucesso!');
+    }
+
+
+    /**
+     * Processa a ativação ou desativação do registro na base de dados
+     * @param integer $id
+     * @return RedirectResponse
+     */
+    public function action(int $id)
+    {
+        $this->checkMethod('put');
+
+        $unit = $this->unitModel->findorFail($id);
+        $unit->setAction();
+
+        $this->unitModel->save($unit);
+
+        return redirect()->route('units')->with('success', 'Unidade atualizada com sucesso!');
+    }
+
+    
+
+    /**
+     * Processa a exclusão do registro na base de dados
+     * @param integer $id
+     * @return RedirectResponse
+     */
+    public function destroy(int $id)
+    {
+        $this->checkMethod('delete');
+
+        $unit = $this->unitModel->findorFail($id);
+
+        $this->unitModel->delete($unit->id);
+
+        return redirect()->route('units')->with('success', 'Unidade excluida com sucesso!');
     }
 }
