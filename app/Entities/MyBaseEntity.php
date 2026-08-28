@@ -3,6 +3,7 @@
 namespace App\Entities;
 
 use CodeIgniter\Entity\Entity;
+use CodeIgniter\I18n\Time;
 
 class MyBaseEntity extends Entity
 {
@@ -43,5 +44,10 @@ class MyBaseEntity extends Entity
     public function setAction(){
 
         $this->isActivated() ? $this->deactivate() : $this->activate();
+    }
+
+    public function createdAt(): string {
+
+        return Time::parse($this->created_at)->format('d-m-Y H:i');
     }
 }

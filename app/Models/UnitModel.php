@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Exceptions\PageNotFoundException;
-use CodeIgniter\Model;
 use App\Entities\Unit;
 
-class UnitModel extends Model
+class UnitModel extends MyBaseModel
 {
     protected $table            = 'units';
     protected $primaryKey       = 'id';
@@ -92,29 +90,6 @@ class UnitModel extends Model
     // Callbacks
     protected $allowCallbacks = true;
     protected $beforeInsert   = ['escapeData'];
-    protected $afterInsert    = [];
     protected $beforeUpdate   = ['escapeData'];
-    protected $afterUpdate    = [];
-    protected $beforeFind     = [];
-    protected $afterFind      = [];
-    protected $beforeDelete   = [];
-    protected $afterDelete    = [];
 
-
-    protected function escapeData(array $data): array
-    {
-
-        if(!isset($data['data'])){
-            return $data;
-        }
-
-        return esc($data);
-    }
-
-    public function findorFail(int | string $id): object{
-
-        $row = $this ->find($id);
-
-        return $row ?? throw new PageNotFoundException("Registro {$id} não encontrado");
-    }
 }
