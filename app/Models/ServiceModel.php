@@ -32,13 +32,13 @@ class ServiceModel extends MyBaseModel
     // Validation
     protected $validationRules      = [
         'id'            => 'permit_empty|is_natural_no_zero',
-        'name'          => 'required|max_length[69]|is_unique[units.name,id,{id}]',
+        'name'          => 'required|max_length[69]|is_unique[services.name,id,{id}]',
     ];
     protected $validationMessages   = [
         'name' => [
             'required'      => 'O Nome é obrigatório.',
             'max_length'    => 'O Nome deve ter no máximo 69 caracteres.',
-            'is_unique'     => 'O Nome deve ser único. Já existe uma unidade com este nome.'
+            'is_unique'     => 'O Nome deve ser único. Já existe um serviço com este nome.'
         ],
     ];
     protected $skipValidation       = false;

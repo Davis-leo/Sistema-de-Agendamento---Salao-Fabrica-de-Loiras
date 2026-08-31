@@ -43,16 +43,15 @@ class ServicesController extends BaseController
 
 
     /**
-     * Renderiza a view para criar as unidades
+     * Renderiza a view para criar serviços
      * 
      * @return RendererInterface
      */
     public function new()
     {
         $data = [
-            'title' => 'Criar unidade',
-            'unit' => new Unit(),
-            'timesInterval' => $this->unitService->renderTimesInterval()
+            'title'   => 'Criar serviço',
+            'service' => new Service(),
         ];
 
         return view('Back/Services/new', $data);
@@ -66,22 +65,22 @@ class ServicesController extends BaseController
     {
         $this->checkMethod('post');
 
-        $unit = new Unit($this->clearRequest());
+        $service = new Service($this->clearRequest());
 
-        if (!$this->unitModel->insert($unit)) {
+        if (!$this->serviceModel->insert($service)) {
 
             return redirect()->back()
                 ->withInput()
                 ->with('danger', 'Verifique os erros e tente novamente.')
-                ->with('errorsValidation', $this->unitModel->errors());
+                ->with('errorsValidation', $this->serviceModel->errors());
 
         }
 
-        return redirect()->route('units')->with('success', 'Unidade criada com sucesso!');
+        return redirect()->route('services')->with('success', 'Serviço criado com sucesso!');
     }
 
     /**
-     * Renderiza a view para gerenciar as unidades
+     * Renderiza a view para editar o registro
      * 
      * @param integer $id
      * @return RendererInterface
@@ -90,9 +89,8 @@ class ServicesController extends BaseController
     {
 
         $data = [
-            'title' => 'Editar unidade',
-            'unit' => $unit = $this->unitModel->findorFail($id),
-            'timesInterval' => $this->unitService->renderTimesInterval($unit->servicetime)
+            'title'   => 'Editar serviço',
+            'service' => $unit = $this->serviceModel->findorFail($id),
         ];
 
         return view('Back/Services/edit', $data);
@@ -107,27 +105,27 @@ class ServicesController extends BaseController
     {
         $this->checkMethod('put');
 
-        $unit = $this->unitModel->findorFail($id);
+        $service = $this->serviceModel->findorFail($id);
 
-        $unit->fill($this->clearRequest());
+        $service->fill($this->clearRequest());
 
-        if (!$unit->hasChanged()) {
+        if (!$service->hasChanged()) {
 
             return redirect()->back()->with('info', 'Não há dados para atualizar.');
         }
 
-        $success = $this->unitModel->save($unit);
+        $success = $this->serviceModel->save($service);
 
         if (!$success) {
 
             return redirect()->back()
                 ->withInput()
                 ->with('danger', 'Verifique os erros e tente novamente.')
-                ->with('errorsValidation', $this->unitModel->errors());
+                ->with('errorsValidation', $this->serviceModel->errors());
 
         }
 
-        return redirect()->route('units')->with('success', 'Unidade atualizada com sucesso!');
+        return redirect()->route('services')->with('success', 'Serviço atualizado com sucesso!');
     }
 
 
@@ -140,12 +138,12 @@ class ServicesController extends BaseController
     {
         $this->checkMethod('put');
 
-        $unit = $this->unitModel->findorFail($id);
-        $unit->setAction();
+        $service = $this->serviceModel->findorFail($id);
+        $service->setAction();
 
-        $this->unitModel->save($unit);
+        $this->serviceModel->save($service);
 
-        return redirect()->route('units')->with('success', 'Unidade atualizada com sucesso!');
+        return redirect()->route('services')->with('success', 'Serviço atualizado com sucesso!');
     }
 
     
@@ -159,10 +157,10 @@ class ServicesController extends BaseController
     {
         $this->checkMethod('delete');
 
-        $unit = $this->unitModel->findorFail($id);
+        $service = $this->serviceModel->findorFail($id);
 
-        $this->unitModel->delete($unit->id);
+        $this->serviceModel->delete($service->id);
 
-        return redirect()->route('units')->with('success', 'Unidade excluida com sucesso!');
+        return redirect()->route('services')->with('success', 'Serviço excluido com sucesso!');
     }
 }

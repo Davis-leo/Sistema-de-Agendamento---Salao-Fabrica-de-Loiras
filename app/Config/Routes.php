@@ -2,6 +2,7 @@
 
 use App\Controllers\Super\ServicesController;
 use App\Controllers\Super\UnitsController;
+use App\Controllers\Super\UnitsServicesController;
 use CodeIgniter\Router\RouteCollection;
 use App\Controllers\Super\HomeController;
 
@@ -26,6 +27,9 @@ $routes->group('super', static function ($routes) {
         $routes->put('update/(:num)', [UnitsController::class,'update/$1'], ['as' => 'units.update']);
         $routes->put('action/(:num)', [UnitsController::class,'action/$1'], ['as' => 'units.action']); // ativa / desativa um registro
         $routes->delete('destroy/(:num)', [UnitsController::class,'destroy/$1'], ['as' => 'units.destroy']);
+
+        // Rotas dos serviços da unidade
+        $routes->get('services/(:num)', [UnitsServicesController::class,'services/$1'], ['as' => 'units.services']);
     });
 
     // rotas de serviços
