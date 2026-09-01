@@ -13,7 +13,7 @@ class MyBaseService
 
 
     /** Elemento HTML a ser exibido quando não houver dados para apresentar */
-    protected const TEXT_FOR_NO_DATA = '<div class="text-info">Não há dados para serem exibidos</div>';
+    protected const TEXT_FOR_NO_DATA = '<div class="text-info">Não há serviços ativos</div>';
 
 
     public function __construct()
