@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\SchedulesController;
 use App\Controllers\Super\ServicesController;
 use App\Controllers\Super\UnitsController;
 use App\Controllers\Super\UnitsServicesController;
@@ -46,3 +47,10 @@ $routes->group('super', static function ($routes) {
         $routes->delete('destroy/(:num)', [ServicesController::class,'destroy/$1'], ['as' => 'services.destroy']);
     });
 });
+
+// rotas de agendamentos do user logado
+    $routes->group('schedules', static function ($routes) {
+
+        $routes->get('/', [SchedulesController::class,'index'], ['as' => 'schedules.new']);
+   
+    });
