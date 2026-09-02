@@ -5,9 +5,10 @@ use App\Controllers\Super\UnitsController;
 use App\Controllers\Super\UnitsServicesController;
 use CodeIgniter\Router\RouteCollection;
 use App\Controllers\Super\HomeController;
+use App\Controllers\HomeController as WebController;
 
 /** @var RouteCollection $routes */
-$routes->get('/', 'Home::index', ['as' => 'home']);
+$routes->get('/', [WebController::class, 'index'], ['as' => 'home']);
 
 /**
  *  @todo colocar filtros de permissão / autenticação
