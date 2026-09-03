@@ -65,7 +65,7 @@ class ScheduleService
         }
 
         $options = [];
-        $options [''] = '--- Selecione um serviço ---';
+        $options [null] = '--- Selecione um serviço ---';
         
 
         foreach ($services as $service) {
