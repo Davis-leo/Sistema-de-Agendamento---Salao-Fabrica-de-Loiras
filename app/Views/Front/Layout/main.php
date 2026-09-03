@@ -108,7 +108,7 @@
             padding-top: 72px;
         }
 
-        main > .container {
+        main>.container {
             max-width: 1180px;
             padding-bottom: 4.5rem;
             padding-top: 4.5rem !important;
@@ -136,7 +136,7 @@
             margin-top: 2.75rem !important;
         }
 
-        .row.mt-4 > .col {
+        .row.mt-4>.col {
             display: flex;
         }
 
@@ -234,7 +234,7 @@
                 padding-top: 64px;
             }
 
-            main > .container {
+            main>.container {
                 padding-bottom: 3rem;
                 padding-left: 1.25rem;
                 padding-right: 1.25rem;
@@ -249,7 +249,7 @@
                 margin-top: 2rem !important;
             }
 
-            .row.mt-4 > .col {
+            .row.mt-4>.col {
                 flex: 0 0 100%;
             }
         }
@@ -273,7 +273,8 @@
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <ul class="navbar-nav me-auto mb-2 mb-md-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="<?php echo route_to('home'); ?>">Home</a>
+                            <a class="nav-link active" aria-current="page"
+                                href="<?php echo route_to('home'); ?>">Home</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Link</a>
@@ -296,7 +297,7 @@
 
         <?php echo $this->renderSection('content') ?>
 
-        
+
     </main>
 
     <footer class="footer mt-auto py-3 bg-light">
@@ -310,6 +311,28 @@
         crossorigin="anonymous"></script>
 
     <?php echo $this->renderSection('js') ?>
+
+    <script>
+        const setParameters = (object) => {
+
+            return (new URLSearchParams(object)).toString();
+        }
+
+        const setHeadersRequest = () => {
+
+            return {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        }
+
+        const showErrorMessage = (message) => {
+
+            boxErrors.innerHTML = '';
+
+            return `<div class="alert alert-danger">${message}</div>`;
+        }
+    </script>
 
 </body>
 

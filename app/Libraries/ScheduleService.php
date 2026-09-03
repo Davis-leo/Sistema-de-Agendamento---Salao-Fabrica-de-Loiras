@@ -2,7 +2,9 @@
 
 namespace App\Libraries;
 
+use App\Models\ServiceModel;
 use App\Models\UnitModel;
+use InvalidArgumentException;
 
 class ScheduleService
 {
@@ -42,6 +44,37 @@ class ScheduleService
 
         // Retornamos
         return $radios;
+    }
+
+    /**
+     * Recupero os serviços associados à unidade informada como um dropdown HTML
+     * @param integer $unitId
+     * @return string
+     */
+    public function renderUnitServices(int $unitId): string
+    {
+        // Validamos a existência da unidade, ativa, com serviços
+        $unit = model(UnitModel::class)->where(['active' => 1, 'services!=' => null, 'services !=' => ''])->findOrfail($unitId);
+
+        // buscamos os serviços dessa unidade
+        $services = model(ServiceModel::class)->whereIn('id', $unit->services)->where('active', 1)->orderBy('name', 'ASC')->findAll();
+
+        if(empty($services)){
+
+            throw new InvalidArgumentException("Os serviços associados à Unidade {$unit->name} não estão ativos ou não existem.");
+        }
+
+        $options = [];
+        $options [''] = '--- Selecione um serviço ---';
+        
+
+        foreach ($services as $service) {
+
+            $options[$service->id] = $service->name;
+        }
+
+        return form_dropdown(data: 'service', options: $options, selected: [], extra: ['id' => 'service_id', 'class' => 'form-select']);
+
     }
 
 }
