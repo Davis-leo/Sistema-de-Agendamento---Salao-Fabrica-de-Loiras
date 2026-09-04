@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Libraries\CalendarService;
 use App\Libraries\ScheduleService;
+use App\Libraries\UnitAvaiableHoursService;
 use CodeIgniter\Config\Factories;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -29,7 +30,7 @@ class SchedulesController extends BaseController
 
 
         $data = [
-            'title'  => 'Criar Agendamento',
+            'title'  => 'Faça o agendamento',
             'units'  => $this->scheduleService->renderUnits(),
             'months' => $this->calendarService->renderMonths(),
         ];

@@ -165,7 +165,7 @@ class CalendarService
                 $calendar .= '</table>';
 
                 // fechamos a div table-responsive
-                $calendar .= '</div';
+                $calendar .= '</div>';
 
                 // Finalmente retornamos o calendário com os dias para o mês desejado
 

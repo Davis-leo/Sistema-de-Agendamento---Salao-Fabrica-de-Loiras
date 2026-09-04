@@ -35,6 +35,36 @@
         box-shadow: var(--salon-shadow);
     }
 
+    #boxCalendar {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #boxCalendar .table-responsive {
+        overflow-x: visible;
+    }
+
+    #boxCalendar table {
+        margin-bottom: 0;
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    #boxCalendar td {
+        padding: .35rem .2rem;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #boxCalendar .btn-calendar-day {
+        align-items: center;
+        display: inline-flex;
+        justify-content: center;
+        min-height: 2.25rem;
+        min-width: 2.25rem;
+        padding: .35rem;
+    }
+
     #mainBoxServices+* {
         min-width: 0;
     }
@@ -152,6 +182,20 @@
         main>.container:has(#mainBoxServices) .row>.col-md-2 {
             margin-left: 0;
             margin-top: 1rem;
+        }
+
+        #mainBoxCalendar>.row>div {
+            margin-bottom: 1rem;
+        }
+
+        #boxCalendar td {
+            padding-left: .1rem;
+            padding-right: .1rem;
+        }
+
+        #boxCalendar .btn-calendar-day {
+            min-height: 2rem;
+            min-width: 2rem;
         }
     }
 </style>
