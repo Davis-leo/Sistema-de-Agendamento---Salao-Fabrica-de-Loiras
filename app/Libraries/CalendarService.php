@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use CodeIgniter\I18n\Time;
+use Exception;
 use InvalidArgumentException;
 
 class CalendarService
@@ -58,6 +59,7 @@ class CalendarService
     /**
      * Renderiza os dias para o mês informado para serem escolhidos no front
      * @param integer $month
+     * @throws Exception
      * @return string
      */
     public function generate (int $month): string 
@@ -105,6 +107,67 @@ class CalendarService
                             <td>Sab</td>
                           </tr>
                          ';
+                
+                // Enquanto o dia de início for maior que zero, adiciono as células vazias através do for,
+                // até que encontremos o dia inicial da semana
+                if($startDay > 0){
+
+                    for($i = 0; $i < $startDay; $i++){
+
+                        $calendar .= '<td>&nbsp;</td>';
+                    }
+                }
+
+                // Nesse ponto podemos popular o calendário
+                for($day = 1; $day <= $daysOfMonth; $day++) {
+
+                    /**
+                     * @todo renderizar botão com o dia
+                     */
+                    $btnDay = $this->renderDayButton(
+                        day: $day, 
+                        month: $month,
+                        //isWeekend: $this->isWeekend(year: $year, month: $month, day: $day),
+                    );
+
+                    $calendar .= "<td>{$btnDay}</td>";
+
+                    // Vamos incrementar o dia de inicio
+                    $startDay++;
+
+                    // Se $startDay for igual a 7 (domingo), adicionamos uma nova linha na tabela
+                    if($startDay === 7){
+
+                        // Reinicio o starDay em zero
+                        $startDay = 0;
+
+                        // Se o dia corrente for menor que $daysOfMonth, então realiazmos a abertura <tr> (nova linha)
+                        if($day <$daysOfMonth){
+
+                            $calendar .='<tr>';
+                        }
+                    }
+                } // fim do for
+
+                // agora preenchemos as células restantes com espaço
+                if($startDay > 0){
+
+                    for($i = $startDay; $i < 7; $i++){
+
+                        $calendar .= '<td>&nbsp;</td>';
+                    }
+
+                    //e fechamos a linha 
+                    $calendar .= '</tr>';
+                }
+
+                // fechamos a tabela
+                $calendar .= '</table>';
+
+                // fechamos a div table-responsive
+                $calendar .= '</div';
+
+                // Finalmente retornamos o calendário com os dias para o mês desejado
 
             return $calendar;
 
@@ -115,6 +178,58 @@ class CalendarService
             return "Não foi possível gerar o calendário para o mês informado";
         }
 
+    }
+
+    /**
+     * Verifica se a data informadaé um final de semana.
+     * @param integer $year
+     * @param integer $month
+     * @param integer $day
+     * @return boolean
+     */
+    private function isWeekend(int $year, int $month, int $day): bool 
+    {
+        // Vamos obter o primerio dia do mês informado no formato unix timestamp
+        $timeCreated = Time::create(year: $year, month: $month, day: $day);
+
+        // Obtém a representação numérica do dia da semana. 0 (domingo) até 6 (sábado)
+        $dayOfWeek = (int) $timeCreated->format('w'); //minúsculo
+
+        //0 => domingo ou 6 sábado
+        return($dayOfWeek === 0 || $dayOfWeek=== 6);
+    }
+
+    /**
+     * Renderiza o botão HTML para click no front
+     * @param integer $day
+     * @param integer $month
+     * @param boolean $isWeekend
+     * @return string
+     */
+    private function renderDayButton(int $day, int $month, bool $isWeekend = false): string 
+    {
+        // Atributos padrão para o botão
+        $attributes = [
+            'type'  => 'button',
+            'class' => 'btn btn-primary btn-calendar-day',
+        ];
+
+        // data atual
+        $now          = Time::now();
+        $currentDay   = (int) $now->getDay();
+        $currentMonth = (int) $now->getMonth();
+        
+        // se o dia for menor que o dia atual e o mês for igual ao mês corrente
+        // então desabilitamos o botão
+        if($day < $currentDay && $month === $currentMonth || $isWeekend){
+
+            $attributes['disabled'] = true;
+        }else{
+            
+            $attributes['class'] = "chosenDay {$attributes['class']}";
+        }
+
+        return form_button(data: $attributes, content: "{$day}");
     }
 
 }

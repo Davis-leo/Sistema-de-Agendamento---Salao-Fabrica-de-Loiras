@@ -165,14 +165,7 @@
 <!-- Begin Page Content -->
 <div class="container">
     <h1 class="mt-5"><?php echo $title ?></h1>
-
-    <!-- DEBUG DO CALENDAR -->
-     <div class="container">
-
-     <?php echo $calendario_debug; ?>
-
-     </div>
-
+    
     <div id="boxErrors" class="mt-4 mb-3">
 
     </div>
@@ -209,6 +202,26 @@
                     <p class="lead">Escolha o Mês</p>
 
                     <?php echo $months ?>
+
+                </div>
+
+                <div id="mainBoxCalendar" class="col-md-12 d-none mb-4">
+
+                    <p class="lead">Escolha o dia e o horário</p>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <div id="boxCalendar">
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <div id="boxHours">
+
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -251,6 +264,9 @@
     const mainBoxServices = document.getElementById('mainBoxServices');
     const boxServices = document.getElementById('boxServices');
     const boxMonths = document.getElementById('boxMonths');
+    const mainBoxCalendar = document.getElementById('mainBoxCalendar');
+    const boxCalendar = document.getElementById('boxCalendar');
+    const boxHours = document.getElementById('boxHours');
 
     // preview do que está sendo escolhido
     const chosenUnitText = document.getElementById('chosenUnitText');
@@ -380,7 +396,7 @@
         getCalendar();
     });
 
-    const getCalendar = async (month) => {
+    const getCalendar = async () => {
 
         // Limpo os erros
         boxErrors.innerHTML = '';
@@ -390,7 +406,7 @@
         chosenHourText.innerText = '';
 
         let url = URL_GET_CALENDAR + '?' + setParameters({
-            month: month
+            month: chosenMonth
         });
 
         const response = await fetch(url, {
@@ -407,9 +423,14 @@
             return;
         }
 
+        // Recuperamos a resposta
         const data = await response.json();
 
-        console.log(data);
+        // Exibo a div do calendário e das horas
+        mainBoxCalendar.classList.remove('d-none');
+
+        // Colocamos a div o calenário criado
+        boxCalendar.innerHTML = data.calendar;
     };
 
 </script>
