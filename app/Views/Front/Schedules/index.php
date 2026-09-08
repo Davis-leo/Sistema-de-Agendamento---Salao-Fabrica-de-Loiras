@@ -65,6 +65,47 @@
         padding: .35rem;
     }
 
+    #boxHours {
+        background: rgba(255, 255, 255, .58);
+        border: 1px solid var(--salon-line);
+        border-radius: 8px;
+        min-height: 100%;
+        padding: 1rem;
+    }
+
+    #boxHours .hours-grid {
+        display: grid;
+        gap: .65rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #boxHours .btn-hour {
+        background: #fff;
+        border: 1px solid var(--salon-rose);
+        border-radius: 6px;
+        color: var(--salon-rose);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .95rem;
+        font-weight: 700;
+        min-height: 2.75rem;
+        padding: .55rem .4rem;
+        transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    #boxHours .btn-hour:hover {
+        background: var(--salon-rose);
+        box-shadow: 0 6px 14px rgba(184, 92, 91, .2);
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    #boxHours .btn-hour:focus-visible {
+        background: var(--salon-rose);
+        box-shadow: 0 0 0 .2rem rgba(184, 92, 91, .2);
+        color: #fff;
+        outline: 0;
+    }
+
     #mainBoxServices+* {
         min-width: 0;
     }
@@ -197,6 +238,20 @@
             min-height: 2rem;
             min-width: 2rem;
         }
+
+        #boxHours {
+            padding: .75rem;
+        }
+
+        #boxHours .hours-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .btn-calendar-day-chosen{
+        color: #fff !important;
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
     }
 </style>
 
@@ -302,6 +357,7 @@
 
     const URL_GET_SERVICES = '<?php echo route_to('get.unit.services'); ?>';
     const URL_GET_CALENDAR = '<?php echo route_to('get.calendar'); ?>';
+    const URL_GET_HOURS = '<?php echo route_to('get.hours'); ?>';
 
     const boxErrors = document.getElementById('boxErrors');
 
@@ -440,6 +496,7 @@
         getCalendar();
     });
 
+    // Calendário
     const getCalendar = async () => {
 
         // Limpo os erros
@@ -475,8 +532,92 @@
 
         // Colocamos a div o calenário criado
         boxCalendar.innerHTML = data.calendar;
+
+        // Agora recupero os elementos que tenham a classe '.chosenDay',
+        // ou seja, os dias que são buttons
+        const buttonsChosenDay = document.querySelectorAll('.chosenDay');
+
+        // Percorro todos os botões
+        buttonsChosenDay.forEach(element => {
+
+            // e fico 'escutando' o click no elemento
+            // e para cada click recupero o valor de 'data-day'
+            element.addEventListener('click', (event) => {
+
+                // Limpo o preview da hora
+                chosenDayText.innerText = '';
+
+                // Redefino para null para garantir
+                chosenHour = null;
+
+                /**
+                 * @todo criar função para remover a classe dos botões clicados
+                 */
+
+                event.target.classList.add('btn-calendar-day-chosen');
+
+                // Armazeno na variável global
+                chosenDay = event.target.dataset.day;
+
+                // Dia escolhido no preview
+                chosenDayText.innerText = chosenDay;
+
+                getHours();
+            });
+        });
     };
 
+    const getHours = async () => {
+
+        boxErrors.innerHTML = '';
+
+        // A unidade realmente foi escolhida?
+        if(!unitId){
+
+            boxErrors.innerHTML = showErrorMessage('Você precisa escolher a unidade de atendimento');
+            return;
+        }
+
+        let url = URL_GET_HOURS + '?' + setParameters({
+            unit_id : unitId,
+            month: chosenMonth,
+            day: chosenDay
+        });
+
+        const response = await fetch(url, {
+            method: 'get',
+            headers: setHeadersRequest(),
+        });
+
+        if (!response.ok) {
+
+            boxErrors.innerHTML = showErrorMessage('Não foi possível recuperar os horários disponíveis.');
+
+            throw new Error(`HTTP error! status: ${response.status}`);
+
+            return;
+        }
+
+        // Recuperamos a resposta
+        const data = await response.json();
+
+        // Recupero as horas
+        const hours = data.hours;
+
+        if(hours === null){
+
+            boxHours.innerHTML = showErrorMessage(`Não há horários disponíveis para o dia ${chosenDay}`);
+
+            chosenDay = null;
+
+            return;
+        }
+
+        // Colocamos na div as horas
+        boxHours.innerHTML = hours;
+
+
+    };
 </script>
 
 <?php echo $this->endSection(); ?>

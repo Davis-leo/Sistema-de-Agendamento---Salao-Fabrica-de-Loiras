@@ -56,10 +56,8 @@ class UnitAvaiableHoursService
                 isCurrentDay: $isCurrentDay
             );
 
-            dd($timeRange);
-
-            //abertura da div com os horários com valor padrão null
-            $divHours = null;
+            // Abertura da grade de horários com valor padrão null
+            $divHours = '<div class="hours-grid">';
 
             foreach($timeRange as $hour){
                 
@@ -68,6 +66,8 @@ class UnitAvaiableHoursService
                  */
                 $divHours .= form_button(data: ['class' => 'btn btn-hour btn-primary', 'data-hour' => $hour], content: $hour);
             }
+
+            $divHours .= '</div>';
 
             // Finalmente retornamos o range de horários
             return $divHours;
