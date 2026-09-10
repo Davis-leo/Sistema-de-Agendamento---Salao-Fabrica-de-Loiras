@@ -248,7 +248,8 @@
         }
     }
 
-    .btn-calendar-day-chosen{
+    .btn-calendar-day-chosen,
+    .btn-hour-chosen {
         color: #fff !important;
         background-color: #28a745 !important;
         border-color: #28a745 !important;
@@ -264,7 +265,7 @@
 <!-- Begin Page Content -->
 <div class="container">
     <h1 class="mt-5"><?php echo $title ?></h1>
-    
+
     <div id="boxErrors" class="mt-4 mb-3">
 
     </div>
@@ -320,8 +321,15 @@
 
                             </div>
                         </div>
+
+
                     </div>
 
+                </div>
+
+                <div class="col-md-12 border-top pt-4">
+
+                    <button id="btnTryCreate" class="btn btn-primary">Criar meu agendamento</button>
                 </div>
 
 
@@ -367,6 +375,7 @@
     const mainBoxCalendar = document.getElementById('mainBoxCalendar');
     const boxCalendar = document.getElementById('boxCalendar');
     const boxHours = document.getElementById('boxHours');
+    const btnTryCreate = document.getElementById('btnTryCreate');
 
     // preview do que está sendo escolhido
     const chosenUnitText = document.getElementById('chosenUnitText');
@@ -390,6 +399,12 @@
         element.addEventListener('click', (event) => {
 
             mainBoxServices.classList.remove('d-none');
+
+            // Redefinimos as opções dos meses
+            resetMonthOptions();
+
+            // Redefino o calendário
+            resetBoxCalendar();
 
             // atribuo à variável global o valor da unidade clicada
             unitId = element.value;
@@ -466,21 +481,15 @@
         // Limpo o preview do mês escolhido a cada mudança
         chosenMonthText.innerText = '';
 
-        /**
-         * @todo CRIAR ESSA FUNÇÃO
-         */
-        // resetBoxCalendar();
+        resetBoxCalendar();
 
         const month = event.target.value;
 
-        if(!month){
+        if (!month) {
 
-            /**
-             * @todo CRIAR FUNÇÃO
-             */
-            // resetMonthDataVariables();
+            resetMonthDataVariables();
 
-            // resetBoxCalendar();
+            resetBoxCalendar();
 
             return;
         }
@@ -495,6 +504,45 @@
         // Finalmente buscamos o calendário para o mês escolhido
         getCalendar();
     });
+
+    btnTryCreate.addEventListener('click', (event) => {
+
+        event.preventDefault();
+
+        boxErrors.innerHTML = '';
+
+        // Unidade foi escolhida?
+        if(unitId === null || unitId === ''){
+
+            boxErrors.innerHTML = showErrorMessage('Escolha a unidade');
+            return;
+        }
+
+        // Serviço foi escolhido?
+        if(serviceId === null || serviceId === ''){
+
+            boxErrors.innerHTML = showErrorMessage('Escolha o serviço');
+            return;
+        }
+
+        // Verificamos ser os campos referentes ao mês, dia e hora estão devidamente preenchidos
+        const dateFieldsAreFilled = (chosenMonth !== null && chosenDay !== null && chosenHour !== null);
+
+        if(!dateFieldsAreFilled){
+
+            boxErrors.innerHTML = showErrorMessage('Escolha o Mês, Dia e Hora para prosseguir');
+            return;
+        }
+
+        // Desabilitamos o botão
+        btnTryCreate.disabled = true;
+        btnTryCreate.innerText = 'Estamos criando o seu agendamento...';
+
+        // Agora podemos criar o agendamento
+        tryCreateSchedule();
+    });
+    
+    //----------------------------FUNÇÕES-------------------------------//
 
     // Calendário
     const getCalendar = async () => {
@@ -545,15 +593,18 @@
             element.addEventListener('click', (event) => {
 
                 // Limpo o preview da hora
-                chosenDayText.innerText = '';
+                chosenHourText.innerText = '';
+
+                // mensagem
+                boxHours.innerHTML = '<span class="text-info">Carregando as horas...</span>';
 
                 // Redefino para null para garantir
                 chosenHour = null;
 
-                /**
-                 * @todo criar função para remover a classe dos botões clicados
-                 */
+                // Antes preisamos remover
+                removeClassFromElements(buttonsChosenDay, 'btn-calendar-day-chosen');
 
+                // Adiciona a classe no elemento
                 event.target.classList.add('btn-calendar-day-chosen');
 
                 // Armazeno na variável global
@@ -572,14 +623,14 @@
         boxErrors.innerHTML = '';
 
         // A unidade realmente foi escolhida?
-        if(!unitId){
+        if (!unitId) {
 
             boxErrors.innerHTML = showErrorMessage('Você precisa escolher a unidade de atendimento');
             return;
         }
 
         let url = URL_GET_HOURS + '?' + setParameters({
-            unit_id : unitId,
+            unit_id: unitId,
             month: chosenMonth,
             day: chosenDay
         });
@@ -604,7 +655,7 @@
         // Recupero as horas
         const hours = data.hours;
 
-        if(hours === null){
+        if (hours === null) {
 
             boxHours.innerHTML = showErrorMessage(`Não há horários disponíveis para o dia ${chosenDay}`);
 
@@ -616,7 +667,78 @@
         // Colocamos na div as horas
         boxHours.innerHTML = hours;
 
+        // Agora recupero os elementos que tenham a classe '.btn-hour',
+        // ou seja, os buttons dos horários
+        const buttonsBtnHour = document.querySelectorAll('.btn-hour');
 
+        // percorro eles
+        buttonsBtnHour.forEach(element => {
+
+            element.addEventListener('click', (event) => {
+
+                // Removo a classe antes
+                removeClassFromElements(buttonsBtnHour, 'btn-hour-chosen');
+
+                // e agora adiciono só no elemento clicado
+                event.currentTarget.classList.add('btn-hour-chosen');
+
+                // Armazenamos na variável global
+                chosenHour = event.target.dataset.hour;
+
+                // Preview da hora escolhida
+                chosenHourText.innerText = chosenHour;
+            });
+        });
+
+
+    };
+
+    // Redefine as opçoes dos meses
+    const resetMonthOptions = () => {
+
+        console.log('Redefine as opções de meses');
+
+        // Ocultamos a div dos meses
+        boxMonths.classList.add('d-none');
+
+        // Volta para a opção '--- Escolha ---'
+        document.getElementById('month').selectedIndex = 0;
+
+        // nulamos esses campos
+        resetMonthDataVariables();
+    }
+
+    // Redefine as variáveis pertinentes ao mês, dia, hora...
+    const resetMonthDataVariables = () => {
+
+        console.log('Redefine as variáveis pertinentes ao mês, dia, hora...');
+
+        chosenMonth = null;
+        chosenDay = null;
+        chosenHour = null;
+    }
+
+    // Redefine o calendário
+    const resetBoxCalendar = () => {
+
+        console.log('Redefine o calendário');
+
+        mainBoxCalendar.classList.add('d-none');
+
+        boxCalendar.innerHTML = '';
+        boxHours.innerHTML = '';
+    }
+
+    // Remove a classe do array de elementos
+    const removeClassFromElements = (elements, className) => {
+
+        elements.forEach(element => {
+
+            if (element.classList.contains(className)) {
+
+                element.classList.remove(className);
+            }
+        });
     };
 </script>
 
