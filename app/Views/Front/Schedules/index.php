@@ -266,13 +266,21 @@
 <div class="container">
     <h1 class="mt-5"><?php echo $title ?></h1>
 
-    <div id="boxErrors" class="mt-4 mb-3">
-
-    </div>
-
     <div class="row">
 
         <div class="col-md-8">
+
+            <div class="mt-3">
+
+                <?php if (session()->has('success')): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?php echo session('success'); ?>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </div>
 
             <div class="row">
 
@@ -327,6 +335,10 @@
 
                 </div>
 
+                <div id="boxErrors" class="mt-4 mb-3">
+
+                </div>
+
                 <div class="col-md-12 border-top pt-4">
 
                     <button id="btnTryCreate" class="btn btn-primary">Criar meu agendamento</button>
@@ -366,6 +378,7 @@
     const URL_GET_SERVICES = '<?php echo route_to('get.unit.services'); ?>';
     const URL_GET_CALENDAR = '<?php echo route_to('get.calendar'); ?>';
     const URL_GET_HOURS = '<?php echo route_to('get.hours'); ?>';
+    const URL_CREATION_SCHEDULE = '<?php echo route_to('create.schedule'); ?>';
 
     const boxErrors = document.getElementById('boxErrors');
 
@@ -390,6 +403,10 @@
     let chosenMonth = null;
     let chosenDay = null;
     let chosenHour = null;
+
+    // CSRF CODE PARA ENVIAR NO REQUEST
+    let csrfTokenName = '<?php echo csrf_token(); ?>'
+    let csrfTokenValue = '<?php echo csrf_hash(); ?>'
 
     const units = document.getElementsByName('unit_id');
 
@@ -512,14 +529,14 @@
         boxErrors.innerHTML = '';
 
         // Unidade foi escolhida?
-        if(unitId === null || unitId === ''){
+        if (unitId === null || unitId === '') {
 
             boxErrors.innerHTML = showErrorMessage('Escolha a unidade');
             return;
         }
 
         // Serviço foi escolhido?
-        if(serviceId === null || serviceId === ''){
+        if (serviceId === null || serviceId === '') {
 
             boxErrors.innerHTML = showErrorMessage('Escolha o serviço');
             return;
@@ -528,7 +545,7 @@
         // Verificamos ser os campos referentes ao mês, dia e hora estão devidamente preenchidos
         const dateFieldsAreFilled = (chosenMonth !== null && chosenDay !== null && chosenHour !== null);
 
-        if(!dateFieldsAreFilled){
+        if (!dateFieldsAreFilled) {
 
             boxErrors.innerHTML = showErrorMessage('Escolha o Mês, Dia e Hora para prosseguir');
             return;
@@ -541,8 +558,69 @@
         // Agora podemos criar o agendamento
         tryCreateSchedule();
     });
-    
+
     //----------------------------FUNÇÕES-------------------------------//
+
+    // tenta criar o agendamento    
+    const tryCreateSchedule = async () => {
+
+        boxErrors.innerHTML = '';
+
+        // O que será enviado no request
+        const body = {
+
+            unit_id: parseInt(unitId),
+            service_id: parseInt(serviceId),
+            month: parseInt(chosenMonth),
+            day: parseInt(chosenDay),
+            hour: parseInt(chosenHour)
+        };
+
+        body[csrfTokenName] = csrfTokenValue;
+
+        const response = await fetch(URL_CREATION_SCHEDULE, {
+            method: 'post',
+            headers: setHeadersRequest(),
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+
+            // Temos erros de validação (status code = 400)
+            if (response.status === 400) {
+
+                // Habilito o botão para nova tentativa
+                btnTryCreate.disable = false;
+                btnTryCreate.innerText = 'Criar meu agendamento';
+
+                const data = await response.json();
+                const errors = data.errors;
+                
+                // Atualizo o token do CSRF
+                csrfTokenValue = data.token;
+
+                // Transformo o array de erros em uma string
+                let message = Object.keys(errors).map(field => errors[field]).join(', ');
+
+                boxErrors.innerHTML = showErrorMessage(message);
+
+                return;
+            }
+
+            // erro diferente de 400
+
+            boxErrors.innerHTML = showErrorMessage('Não foi possível criar o seu agendamento');
+
+            throw new Error(`HTTP error! status: ${response.status}`);
+
+            return;
+        }
+
+        // Tudo certo... agendamento criado
+
+        //retornamos para a mesma view para exibir a mensagem de sucesso.
+        window.location.href = window.location.href;
+    };
 
     // Calendário
     const getCalendar = async () => {

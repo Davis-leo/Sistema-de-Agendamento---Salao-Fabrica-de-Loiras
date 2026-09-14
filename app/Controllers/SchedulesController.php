@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Libraries\CalendarService;
 use App\Libraries\ScheduleService;
 use App\Libraries\UnitAvaiableHoursService;
+use App\Validation\Schedule;
 use CodeIgniter\Config\Factories;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -30,8 +31,8 @@ class SchedulesController extends BaseController
 
 
         $data = [
-            'title'  => 'Faça o agendamento',
-            'units'  => $this->scheduleService->renderUnits(),
+            'title' => 'Faça o agendamento',
+            'units' => $this->scheduleService->renderUnits(),
             'months' => $this->calendarService->renderMonths(),
         ];
 
@@ -105,6 +106,45 @@ class SchedulesController extends BaseController
 
             return $this->response->setJSON([
                 'hours' => Factories::class(UnitAvaiableHoursService::class)->renderHours($this->request->getGet())
+            ]);
+
+        } catch (\Throwable $th) {
+
+            log_message('error', '[ERROR] {exception}', ['exception' => $th]);
+
+            $this->response->setStatusCode(500);
+
+        }
+    }
+
+    /**
+     * Tenta criar o agendamento
+     * @return ResponseInterface
+     */
+    public function createSchedule()
+    {
+
+        try {
+
+            $this->checkMethod('ajax');
+
+            $request = (array) $this->request->getJSON();
+
+            $rules = Factories::class(Schedule::class)->rules();
+
+            if (!$this->validateData($request, $rules)) {
+
+                return $this->response->setStatusCode(400)->setJSON([
+                    'success' => false,
+                    'token' => csrf_hash(),
+                    'errors' => $this->validator->getErrors()
+                ]);
+            }
+
+            session()->setFlashdata('success', 'Agendamento criado com sucesso!');
+
+            return $this->response->setJSON([
+                'success' => true
             ]);
 
         } catch (\Throwable $th) {
