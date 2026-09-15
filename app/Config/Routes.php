@@ -14,10 +14,7 @@ $routes->get('/', [WebController::class, 'index'], ['as' => 'home']);
 // rotas de autenticaçãp
 service('auth')->routes($routes);
 
-/**
- *  @todo colocar filtros de permissão / autenticação
- */
-$routes->group('super', static function ($routes) {
+$routes->group('super', ['filter' => 'group:superadmin'] ,static function ($routes) {
 
     // home
     $routes->get('/', [HomeController::class,'index'], ['as' => 'super.home']);
