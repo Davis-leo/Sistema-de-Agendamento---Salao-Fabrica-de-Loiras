@@ -11,6 +11,9 @@ use App\Controllers\HomeController as WebController;
 /** @var RouteCollection $routes */
 $routes->get('/', [WebController::class, 'index'], ['as' => 'home']);
 
+// rotas de autenticaçãp
+service('auth')->routes($routes);
+
 /**
  *  @todo colocar filtros de permissão / autenticação
  */

@@ -34,6 +34,17 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+
+        // Da lib de autenticação
+
+        'session'      => \CodeIgniter\Shield\Filters\SessionAuth::class,
+        'tokens'       => \CodeIgniter\Shield\Filters\TokenAuth::class,
+        'chain'        => \CodeIgniter\Shield\Filters\ChainAuth::class,
+        'auth-rates'   => \CodeIgniter\Shield\Filters\AuthRates::class,
+        'group'        => \CodeIgniter\Shield\Filters\GroupFilter::class,
+        'permission'   => \CodeIgniter\Shield\Filters\PermissionFilter::class,
+        'force-reset'  => \CodeIgniter\Shield\Filters\ForcePasswordResetFilter::class,
+        'jwt'          => \CodeIgniter\Shield\Filters\JWTAuth::class,
     ];
 
     /**
@@ -75,6 +86,8 @@ class Filters extends BaseFilters
             // 'honeypot',
             'csrf',
             // 'invalidchars',
+            'session' => ['except' => ['login*', 'register', 'auth/a/*', '/']], // Para a raiz do site não é necessário estar logado
+            'force-reset' => ['except' => ['login*', 'register', 'auth/a/*', 'change-password', 'logout']]
         ],
         'after' => [
             // 'honeypot',
@@ -106,5 +119,11 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'auth-rates' => [
+            'before' => [
+                'login*', 'register', 'auth/*'
+            ]
+        ]
+    ];
 }
