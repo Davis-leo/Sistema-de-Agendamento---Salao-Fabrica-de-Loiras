@@ -51,7 +51,7 @@ class Auth extends ShieldAuth
         'register'                    => '\App\Views\Auth\register',
         'action_email_2fa'            => '\App\Views\Auth\email_2fa_show',
         'action_email_2fa_verify'     => '\App\Views\Auth\email_2fa_verify',
-        'action_email_2fa_email'      => '\CodeIgniter\Shield\Views\Email\email_2fa_email',
+        'action_email_2fa_email'      => '\App\Views\Auth\email_2fa_email',
         'action_email_activate_show'  => '\App\Views\Auth\email_activate_show',
         'action_email_activate_email' => '\CodeIgniter\Shield\Views\Email\email_activate_email',
         'magic-link-login'            => '\CodeIgniter\Shield\Views\magic_link_form',
