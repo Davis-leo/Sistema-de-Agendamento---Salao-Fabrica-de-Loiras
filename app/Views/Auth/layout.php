@@ -154,6 +154,15 @@
         .auth-alert.error { background: #f8e2df; color: #793b39; }
         .auth-alert.success { background: #e4f1e5; color: #35633b; }
 
+        .auth-error-list {
+            display: grid;
+            gap: .65rem;
+            margin: 0;
+            padding-left: 1.1rem;
+        }
+
+        .auth-error-list li { padding-left: .2rem; }
+
         .field { margin-bottom: 1.15rem; }
 
         .field label {

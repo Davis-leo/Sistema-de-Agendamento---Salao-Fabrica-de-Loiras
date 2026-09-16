@@ -24,7 +24,7 @@
                     <tr>
                         <td style="padding:28px 36px; background-color:#332925;">
                             <p style="margin:0; color:#e6a59a; font-size:12px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;">Agendamentos</p>
-                            <p style="margin:12px 0 0; color:#fff9f3; font-family:Georgia, 'Times New Roman', serif; font-size:27px; line-height:1.2; font-weight:bold;">Seu momento conosco está reservado.</p>
+                            <p style="margin:12px 0 0; color:#fff9f3; font-family:Georgia, 'Times New Roman', serif; font-size:27px; line-height:1.2; font-weight:bold;">Seu momento com a gente está reservado.</p>
                         </td>
                     </tr>
                     <tr>

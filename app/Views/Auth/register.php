@@ -22,9 +22,18 @@
             <?php elseif (session('errors') !== null) : ?>
                 <div class="auth-alert error" role="alert">
                     <?php if (is_array(session('errors'))) : ?>
-                        <?php foreach (session('errors') as $error) : ?>
-                            <?= esc($error) ?><br>
-                        <?php endforeach ?>
+                        <ul class="auth-error-list">
+                            <?php foreach (session('errors') as $error) : ?>
+                                <?php $errorMessage = match ($error) {
+                                    'The Username field is not in the correct format.' => 'O nome de usuário deve ter entre 3 e 30 caracteres e conter apenas letras, números e ponto, sem espaços ou acentos.',
+                                    'The Username field must contain a unique value.' => 'Esse nome de usuário já está sendo usado. Escolha outro nome.',
+                                    'Password must not be a common password.' => 'A senha deve ter pelo menos 8 caracteres, não pode ser uma senha comum e não deve conter seu nome de usuário ou e-mail.',
+                                    'The Password (again) field does not match the Password field.' => 'As senhas não coincidem. Digite a mesma senha nos dois campos.',
+                                    default => $error,
+                                } ?>
+                                <li><?= esc($errorMessage) ?></li>
+                            <?php endforeach ?>
+                        </ul>
                     <?php else : ?>
                         <?= esc(session('errors')) ?>
                     <?php endif ?>
