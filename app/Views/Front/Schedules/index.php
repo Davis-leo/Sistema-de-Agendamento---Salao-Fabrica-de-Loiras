@@ -590,7 +590,7 @@
             if (response.status === 400) {
 
                 // Habilito o botão para nova tentativa
-                btnTryCreate.disable = false;
+                btnTryCreate.disabled = false;
                 btnTryCreate.innerText = 'Criar meu agendamento';
 
                 const data = await response.json();

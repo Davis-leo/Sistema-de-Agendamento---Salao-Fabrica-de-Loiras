@@ -18,7 +18,8 @@
             <p class="auth-subtitle">Acesse sua conta para continuar.</p>
 
             <?php if (session('error') !== null) : ?>
-                <div class="auth-alert error" role="alert"><?= esc(session('error')) ?></div>
+                <?php $errorMessage = session('error') === 'Unable to log you in. Please check your credentials.' ? 'Não foi possível fazer login. Verifique suas credenciais.' : session('error') ?>
+                <div class="auth-alert error" role="alert"><?= esc($errorMessage) ?></div>
             <?php elseif (session('errors') !== null) : ?>
                 <div class="auth-alert error" role="alert">
                     <?php if (is_array(session('errors'))) : ?>

@@ -112,6 +112,30 @@
 
         .auth-content { max-width: 400px; width: 100%; }
 
+        .auth-confirmation-mark {
+            align-items: center;
+            background: var(--salon-sand);
+            border: 1px solid rgba(184, 92, 91, .2);
+            border-radius: 50%;
+            color: var(--salon-rose-dark);
+            display: flex;
+            font-size: 1.35rem;
+            font-weight: 700;
+            height: 3.25rem;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            width: 3.25rem;
+        }
+
+        .auth-kicker {
+            color: var(--salon-rose-dark);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            margin: 0 0 .55rem;
+            text-transform: uppercase;
+        }
+
         .auth-content h2 {
             font-family: 'Playfair Display', Georgia, serif;
             font-size: 2.25rem;
@@ -155,6 +179,13 @@
             border-color: var(--salon-rose);
             box-shadow: 0 0 0 3px rgba(184, 92, 91, .14);
             outline: 0;
+        }
+
+        .auth-code-input {
+            font-size: 1.45rem !important;
+            font-weight: 700;
+            letter-spacing: .35em;
+            text-align: center;
         }
 
         .remember {

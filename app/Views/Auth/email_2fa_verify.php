@@ -14,8 +14,10 @@
 
     <section class="auth-panel">
         <div class="auth-content">
+            <div class="auth-confirmation-mark" aria-hidden="true">✓</div>
+            <p class="auth-kicker">Código de segurança</p>
             <h2>Digite o código</h2>
-            <p class="auth-subtitle">Use o código de segurança que enviamos para o seu e-mail.</p>
+            <p class="auth-subtitle">Seu código foi enviado por e-mail. Digite-o abaixo para confirmar seu acesso.</p>
 
             <?php if (session('error') !== null) : ?>
                 <?php $errorMessage = session('error') === 'The code was incorrect.' ? 'O código informado está incorreto.' : session('error') ?>
@@ -27,7 +29,7 @@
 
                 <div class="field">
                     <label for="token">Código de segurança</label>
-                    <input type="number" id="token" name="token" placeholder="000000" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required>
+                    <input class="auth-code-input" type="number" id="token" name="token" placeholder="000000" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required>
                 </div>
 
                 <button type="submit" class="auth-button">Confirmar código</button>

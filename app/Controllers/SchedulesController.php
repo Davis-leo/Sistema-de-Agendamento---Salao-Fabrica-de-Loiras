@@ -136,8 +136,20 @@ class SchedulesController extends BaseController
 
                 return $this->response->setStatusCode(400)->setJSON([
                     'success' => false,
-                    'token' => csrf_hash(),
-                    'errors' => $this->validator->getErrors()
+                    'token'   => csrf_hash(),
+                    'errors'  => $this->validator->getErrors()
+                ]);
+            }
+
+            $result = $this->scheduleService->createSchedule(request: $request);
+
+            // Se for string, temos erro na criação
+            if(is_string($result)){
+
+                return $this->response->setStatusCode(400)->setJSON([
+                    'success' => false,
+                    'token'   => csrf_hash(),
+                    'errors'  => ['reason' => $result]
                 ]);
             }
 
