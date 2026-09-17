@@ -529,3 +529,137 @@ Sistema-de-Agendamento---Salao-Fabrica-de-Loiras/
 ```
 
 > **Importante:** não é necessário executar novamente `php spark make:migration` para migrations que já existem no projeto. Esse comando é utilizado durante o desenvolvimento para **criar novas migrations**. Em um novo computador, basta obter as migrations existentes pelo Git e executar `php spark migrate`.
+
+---
+
+## 🌐 Deploy em hospedagem
+
+Para disponibilizar o sistema na internet, é necessário contratar uma hospedagem compatível com PHP e banco de dados. Uma hospedagem compartilhada com cPanel costuma ser suficiente para o tamanho inicial deste projeto. Um VPS somente será necessário caso o sistema cresça ou precise de configurações mais avançadas.
+
+### Requisitos da hospedagem
+
+Antes de contratar o plano, confirme se ele oferece:
+
+* PHP 8.2 ou superior;
+* MySQL ou MariaDB;
+* Apache com `mod_rewrite` ou Nginx configurável;
+* Acesso SSH ou suporte ao Composer;
+* Certificado SSL gratuito para utilizar HTTPS;
+* Permissão para definir a pasta `public/` como raiz do domínio;
+* Permissão de escrita na pasta `writable/`;
+* Backup do banco de dados;
+* Possibilidade de configurar tarefas agendadas, caso sejam necessárias no futuro.
+
+Domínio próprio não é obrigatório: a hospedagem normalmente fornece um endereço temporário. Porém, para um sistema de salão, é recomendado registrar um domínio próprio, como `www.seusalao.com.br`.
+
+### Preparação antes do envio
+
+1. Faça um backup do banco de dados local. As migrations recriam as tabelas, mas não preservam os registros existentes, como usuários, serviços e agendamentos.
+2. Envie o código para o GitHub ou mantenha uma cópia atualizada do projeto.
+3. Não envie senhas, tokens ou credenciais no GitHub.
+4. Confirme que o projeto contém `composer.json`, `composer.lock`, `spark`, `app/` e `public/`.
+
+### Passo a passo do deploy
+
+1. Contrate a hospedagem e registre um domínio, se desejar.
+2. Aponte o domínio para a hospedagem usando os registros DNS indicados pela empresa.
+3. Crie um banco MySQL no painel da hospedagem e anote o nome do banco, usuário, senha e servidor.
+4. Envie o projeto para o servidor via Git, SSH ou gerenciador de arquivos.
+5. Entre na pasta do projeto pelo SSH e instale as dependências:
+
+```bash
+composer install --no-dev --optimize-autoloader
+```
+
+6. Crie o arquivo `.env` a partir do arquivo de exemplo `env`:
+
+```bash
+cp env .env
+```
+
+Em hospedagens que não oferecem terminal, crie o `.env` pelo gerenciador de arquivos. Esse arquivo não deve ser publicado no GitHub.
+
+7. Configure o `.env` com os dados de produção. Exemplo:
+
+```env
+CI_ENVIRONMENT = production
+
+app.baseURL = 'https://www.seusalao.com.br/'
+app.indexPage = ''
+
+database.default.hostname = servidor-do-banco
+database.default.database = nome_do_banco
+database.default.username = usuario_do_banco
+database.default.password = senha_do_banco
+database.default.DBDriver = MySQLi
+database.default.port = 3306
+```
+
+Substitua todos os valores de exemplo pelos dados fornecidos pela hospedagem.
+
+8. Configure o domínio para apontar para a pasta `public/`, e não para a raiz completa do projeto. As pastas `app/`, `writable/` e os arquivos de configuração não devem ficar diretamente acessíveis pela internet.
+9. Garanta que a pasta `writable/` e suas subpastas tenham permissão de escrita pelo usuário do servidor.
+10. Execute as migrations:
+
+```bash
+php spark migrate
+```
+
+11. Crie os dados iniciais necessários, como usuário administrador, unidades e serviços.
+12. Ative o SSL e confirme que o endereço abre com `https://`.
+13. Teste o sistema antes de divulgá-lo:
+
+* abrir a página inicial;
+* criar uma conta;
+* fazer login;
+* cadastrar ou consultar serviços;
+* selecionar uma data e um horário;
+* criar e cancelar um agendamento;
+* verificar o acesso administrativo;
+* testar o envio de e-mails.
+
+> **Importante:** não use `php spark serve` em produção. Esse comando é destinado ao desenvolvimento local. Na hospedagem, o acesso deve ser feito pelo Apache ou Nginx configurado para a pasta `public/`.
+
+### Configuração de e-mail
+
+O projeto possui recursos que podem enviar e-mails, como confirmação de cadastro e notificações. Em produção, não dependa do protocolo genérico `mail`, pois ele pode ser bloqueado ou classificado como spam.
+
+Prefira uma conta de e-mail do próprio domínio e configure SMTP no ambiente de produção. Os dados normalmente necessários são:
+
+* servidor SMTP;
+* usuário da conta de e-mail;
+* senha ou senha de aplicativo;
+* porta SMTP, geralmente 465 ou 587;
+* criptografia SSL ou TLS;
+* endereço e nome do remetente.
+
+Nunca publique a senha SMTP no GitHub. Use o `.env` ou o painel de variáveis da hospedagem, quando disponível.
+
+### Backup e manutenção
+
+Antes de atualizações importantes:
+
+1. Faça backup completo do banco de dados.
+2. Faça backup dos arquivos do projeto e da pasta `writable/uploads/`, caso existam arquivos enviados pelos usuários.
+3. Atualize o código pelo Git ou envie uma nova versão.
+4. Execute `composer install --no-dev --optimize-autoloader` quando o `composer.lock` for alterado.
+5. Execute novas migrations somente quando elas fizerem parte da versão publicada.
+6. Verifique os logs em `writable/logs/` caso ocorra algum erro.
+
+### Checklist rápido
+
+```text
+[ ] Hospedagem com PHP 8.2+ e MySQL/MariaDB
+[ ] Domínio apontado para a hospedagem
+[ ] SSL/HTTPS ativado
+[ ] Projeto enviado para o servidor
+[ ] Dependências instaladas com Composer
+[ ] Arquivo .env configurado para produção
+[ ] Domínio apontando para a pasta public/
+[ ] Pasta writable/ com permissão de escrita
+[ ] Banco criado e migrations executadas
+[ ] Usuário, serviços e horários cadastrados
+[ ] SMTP configurado e testado
+[ ] Backup do banco realizado
+[ ] Login e agendamento testados
+```

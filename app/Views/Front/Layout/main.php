@@ -27,7 +27,7 @@
     <meta name="theme-color" content="#7952b3">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
 
         :root {
             --salon-ink: #2e2927;
@@ -38,6 +38,8 @@
             --salon-rose-dark: #914646;
             --salon-line: rgba(82, 59, 49, .12);
             --salon-shadow: 0 18px 45px rgba(74, 48, 37, .10);
+            --salon-display: 'Cormorant Garamond', Georgia, serif;
+            --salon-body: 'Manrope', sans-serif;
         }
 
         html,
@@ -48,8 +50,8 @@
         body {
             background: var(--salon-cream);
             color: var(--salon-ink);
-            font-family: 'DM Sans', sans-serif;
-            letter-spacing: .01em;
+            font-family: var(--salon-body);
+            letter-spacing: .015em;
         }
 
         body::before {
@@ -71,9 +73,10 @@
 
         .navbar-brand {
             color: #fff9f3 !important;
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 1.25rem;
-            letter-spacing: .01em;
+            font-family: var(--salon-display);
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: .015em;
             white-space: nowrap;
         }
 
@@ -116,9 +119,11 @@
 
         main h1 {
             color: var(--salon-ink);
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: clamp(2.25rem, 5vw, 4rem);
-            line-height: 1.1;
+            font-family: var(--salon-display);
+            font-size: clamp(2.7rem, 5vw, 4.6rem);
+            font-weight: 700;
+            letter-spacing: -.015em;
+            line-height: .98;
             margin-bottom: .75rem;
         }
 
@@ -172,8 +177,9 @@
 
         .card-title {
             color: var(--salon-ink);
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 1.15rem;
+            font-family: var(--salon-display);
+            font-size: 1.35rem;
+            font-weight: 600;
             margin-bottom: .55rem;
         }
 
@@ -221,7 +227,7 @@
             }
 
             .navbar-brand {
-                font-size: 1.08rem;
+                font-size: 1.35rem;
             }
 
             .navbar-collapse {
@@ -242,7 +248,7 @@
             }
 
             main h1 {
-                font-size: 2.45rem;
+                font-size: 2.9rem;
             }
 
             .row.mt-4 {
@@ -265,7 +271,7 @@
         <!-- Fixed navbar -->
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="<?php echo route_to('home'); ?>">Fábrica de Loiras Márcia Marques</a>
+                <a class="navbar-brand" href="<?php echo route_to('home'); ?>">Fábrica de Loiras - Márcia Marques</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                     aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -280,7 +286,7 @@
                             <a class="nav-link" href="<?php echo route_to('schedules.new'); ?>">Criar agendamento</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link disabled" href="<?php echo route_to('schedules.my'); ?>">Meus Agendamentos</a>
+                            <a class="nav-link" href="<?php echo route_to('schedules.my'); ?>">Meus Agendamentos</a>
                         </li>
                     </ul>
                     <div class="d-flex">

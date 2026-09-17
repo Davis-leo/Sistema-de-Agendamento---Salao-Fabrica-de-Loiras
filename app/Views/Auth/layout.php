@@ -6,7 +6,7 @@
     <title><?= $this->renderSection('title') ?> | Agendamentos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --salon-ink: #2e2927;
@@ -16,6 +16,8 @@
             --salon-rose: #b85c5b;
             --salon-rose-dark: #914646;
             --salon-line: rgba(82, 59, 49, .14);
+            --salon-display: 'Cormorant Garamond', Georgia, serif;
+            --salon-body: 'Manrope', sans-serif;
         }
 
         * { box-sizing: border-box; }
@@ -26,7 +28,7 @@
             margin: 0;
             background: var(--salon-cream);
             color: var(--salon-ink);
-            font-family: 'DM Sans', sans-serif;
+            font-family: var(--salon-body);
         }
 
         body::before {
@@ -80,10 +82,11 @@
         }
 
         .auth-intro h1 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-family: var(--salon-display);
+            font-size: clamp(3rem, 5vw, 5rem);
             font-weight: 700;
-            line-height: 1.02;
+            letter-spacing: -.015em;
+            line-height: .94;
             margin: 0 0 1.25rem;
             max-width: 8ch;
         }
@@ -137,8 +140,10 @@
         }
 
         .auth-content h2 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 2.25rem;
+            font-family: var(--salon-display);
+            font-size: 2.65rem;
+            font-weight: 700;
+            letter-spacing: -.01em;
             margin: 0 0 .55rem;
         }
 

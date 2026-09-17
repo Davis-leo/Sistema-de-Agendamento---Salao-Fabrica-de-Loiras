@@ -4,6 +4,7 @@ use App\Controllers\SchedulesController;
 use App\Controllers\Super\ServicesController;
 use App\Controllers\Super\UnitsController;
 use App\Controllers\Super\UnitsServicesController;
+use App\Controllers\UserSchedulesController;
 use CodeIgniter\Router\RouteCollection;
 use App\Controllers\Super\HomeController;
 use App\Controllers\HomeController as WebController;
@@ -56,4 +57,12 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
         $routes->get('calendar', [SchedulesController::class,'getCalendar'], ['as' => 'get.calendar']); // recuperamos via fetch API o calendário para o mês desejado
         $routes->get('hours', [SchedulesController::class,'getHours'], ['as' => 'get.hours']); // recuperamos via fetch API os horários disponíveis
         $routes->post('create', [SchedulesController::class,'createSchedule'], ['as' => 'create.schedule']); // criamos o agendamento via fetch API
+        
+        $routes->group('my', static function ($routes) {
+
+            // Agendamentos do user logado
+            $routes->get('/', [UserSchedulesController::class,'index'], ['as' => 'schedules.my']);
+            $routes->get('all', [UserSchedulesController::class,'all'], ['as' => 'schedules.my.all']); // Recupera via fetch API
+            $routes->delete('cancel', [UserSchedulesController::class,'cancel'], ['as' => 'schedules.my.cancel']); // Cancela via fetch API
+        });
     });
