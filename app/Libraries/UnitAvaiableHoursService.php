@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use App\Models\ScheduleModel;
 use App\Models\UnitModel;
 use CodeIgniter\I18n\Time;
 use DateInterval;
@@ -42,9 +43,8 @@ class UnitAvaiableHoursService
             // Terei algo como: 2023-07-16
             $dateWanted = "{$now->getYear()}-{$month}-{$day}";
 
-            /**
-             * @todo Quando estivermos criando agendamentos, precisamos buscar os agendamentos já realizados para unidade em questão.
-             */
+            // debug
+            // $dateWanted = '2026-09-17';
 
             // Precisamos identificar se a data desejada é a data atual
             $isCurrentDay = $dateWanted === $now->format('Y-m-d');
@@ -59,12 +59,20 @@ class UnitAvaiableHoursService
             // Abertura da grade de horários com valor padrão null
             $divHours = '<div class="hours-grid">';
 
+            // Recuperamos os agendamentos em aberto da unidade
+            $unitSchedules = model(ScheduleModel::class)->getScheduledHoursByDate(unitId: $unit->id, dateWanted: $dateWanted);
+
+
+            // Precorro os horários gerados
             foreach($timeRange as $hour){
+            
+                // Se não tiver no 'unitScheduledHours', então fazemos o 'append' em 'divHours'
+                if(! in_array($hour, $unitSchedules)){
+
+                    $divHours .= form_button(data: ['class' => 'btn btn-hour btn-primary', 'data-hour' => $hour], content: $hour);
+                }
+
                 
-                /**
-                 * @todo Verificar se o horário já não existe na tabela de agendamentos
-                 */
-                $divHours .= form_button(data: ['class' => 'btn btn-hour btn-primary', 'data-hour' => $hour], content: $hour);
             }
 
             $divHours .= '</div>';

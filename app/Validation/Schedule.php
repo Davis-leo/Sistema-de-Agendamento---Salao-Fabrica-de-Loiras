@@ -46,10 +46,10 @@ class Schedule
 
             'hour' => [
 
-                'rules'  => 'required|max_length[5]', // hh:mm
+                'rules'  => 'required|exact_length[5]', // hh:mm
                 'errors' => [
-                    'required'   => 'Informe a hora',
-                    'max_length' => 'Hora com formato inválido', 
+                    'required'     => 'Informe a hora',
+                    'exact_length' => 'Hora com formato inválido, precisa ser hh:mm', 
                 ],
             ],
         ];
