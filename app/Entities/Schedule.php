@@ -21,16 +21,16 @@ class Schedule extends Entity
     public function situation(): string{
 
         if($this->finished){
-            return "Finalizado em {$$this->updatedAt()}";
+            return "Finalizado em {$this->updatedAt()}";
         }
 
         if($this->canceled){
-            return "Cancelado em {$$this->updatedAt()}";
+            return "Cancelado em {$this->updatedAt()}";
         }
 
         $isBefore = Time::parse($this->chosen_date)->isBefore(Time::now());
 
-        return $isBefore ? "Ocorreu em {$this->formated_chosen_date}":"Seré em {$this->formated_chosen_date}";
+        return $isBefore ? "Ocorreu em {$this->formated_chosen_date}":"Será em {$this->formated_chosen_date}";
     }
 
     public function canBeCanceled(): bool {

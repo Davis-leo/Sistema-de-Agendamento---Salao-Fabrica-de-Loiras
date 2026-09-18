@@ -139,7 +139,7 @@ class ScheduleModel extends MyBaseModel
             'schedules.*',
             'DATE_FORMAT(schedules.chosen_date, "%d/%m/%Y às %H:%i") AS formated_chosen_date', // 23/03/2026 às 15:15
             'units.name AS unit',
-            'units.adress',
+            'units.address',
             'services.name AS service',
         ]);
 

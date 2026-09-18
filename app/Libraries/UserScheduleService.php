@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Lbraries;
+namespace App\Libraries;
 
 use App\Models\ScheduleModel;
 
@@ -38,9 +38,16 @@ class UserScheduleService
 
             $ul .= '<li class="list-group-item d-flex justify-content-between align-items-start">'; // abri a li
 
+            $btnCancel = '';
+
+            if($schedule->canBeCanceled()){
+
+                $btnCancel .= $this->renderBtnCancel($schedule->id);
+            }
+
             $ul .= "<div class='ms-2 me-auto'><div class='fw-bold'>{$schedule->unit} {$schedule->address}</div>
                    {$schedule->service}
-                   <p>Cancelar</p>
+                   <p>{$btnCancel}</p>
                    </div>";
             
             $ul .= $schedule->situation();
@@ -51,5 +58,18 @@ class UserScheduleService
         $ul .= '</ul>';
 
         return $ul;
+    }
+
+    /**
+     * Renderiza o botão HTML para cancelar o agendamento
+     * @param integer|string $id
+     * @return string
+     */
+    private function renderBtnCancel(int|string $id): string{
+
+        return form_button([
+            'class'         => 'btn btn-danger mt-4 btn-sm btnCancelSchedule',
+            'data-schedule' => $id,
+        ], 'Cancelar');
     }
 }
