@@ -17,6 +17,9 @@ class ScheduleModel extends MyBaseModel
         'unit_id',
         'service_id',
         'user_id',
+        'customer_name',
+        'customer_phone',
+        'created_by',
         'finished',
         'canceled',   
         'chosen_date',     
@@ -62,7 +65,9 @@ class ScheduleModel extends MyBaseModel
             return $data;
         }
 
-        $data['data']['user_id'] = auth()->user()->id;
+        if (!array_key_exists('user_id', $data['data'])) {
+            $data['data']['user_id'] = auth()->user()->id;
+        }
 
         return $data;
     }
@@ -77,8 +82,10 @@ class ScheduleModel extends MyBaseModel
     public function chosenDateisFree(int|string $unitId, string $chosenDate): bool
     {
 
+        $normalizedDate = date('Y-m-d H:i', strtotime($chosenDate));
+
         return $this->where('unit_id', $unitId)
-            ->where('chosen_date', $chosenDate)
+            ->where('DATE_FORMAT(chosen_date, "%Y-%m-%d %H:%i")', $normalizedDate)
             ->where('canceled', 0)
             ->first() === null;
     }
@@ -169,12 +176,13 @@ class ScheduleModel extends MyBaseModel
             'units.name AS unit',
             'units.address',
             'services.name AS service',
-            'users.username AS user',
+            'COALESCE(users.username, schedules.customer_name) AS user',
+            'schedules.customer_phone',
         ]);
 
         $this->join('units', 'units.id = schedules.unit_id');
         $this->join('services', 'services.id = schedules.service_id');
-        $this->join('users', 'users.id = schedules.user_id');
+        $this->join('users', 'users.id = schedules.user_id', 'left');
         $this->where('schedules.unit_id', $unitId);
         $this->orderBy('schedules.id', 'DESC');
 

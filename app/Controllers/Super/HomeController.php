@@ -21,11 +21,11 @@ class HomeController extends BaseController
                 'DATE_FORMAT(schedules.chosen_date, "%d/%m/%Y às %H:%i") AS formated_chosen_date',
                 'units.name AS unit',
                 'services.name AS service',
-                'users.username AS user',
+                'COALESCE(users.username, schedules.customer_name) AS user',
             ])
             ->join('units', 'units.id = schedules.unit_id')
             ->join('services', 'services.id = schedules.service_id')
-            ->join('users', 'users.id = schedules.user_id')
+            ->join('users', 'users.id = schedules.user_id', 'left')
             ->where('schedules.canceled', 0)
             ->where('schedules.finished', 0)
             ->where('schedules.chosen_date >=', Time::now()->toDateTimeString())

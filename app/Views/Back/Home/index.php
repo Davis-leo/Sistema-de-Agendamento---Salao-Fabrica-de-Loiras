@@ -266,6 +266,10 @@
                 <span>Administração</span>
             </div>
             <div class="dashboard-actions">
+                <a class="dashboard-action" href="<?php echo route_to('super.schedules.new'); ?>">
+                    <span>Novo agendamento</span>
+                    <i class="fas fa-calendar-plus"></i>
+                </a>
                 <a class="dashboard-action" href="<?php echo route_to('units'); ?>">
                     <span>Gerenciar unidades</span>
                     <i class="fas fa-building"></i>

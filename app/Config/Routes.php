@@ -1,7 +1,8 @@
 <?php
 
-use App\Controllers\SchedulesController;
+use App\Controllers\SchedulesController as FrontSchedulesController;
 use App\Controllers\Super\ServicesController;
+use App\Controllers\Super\SchedulesController;
 use App\Controllers\Super\UnitsController;
 use App\Controllers\Super\UnitsServicesController;
 use App\Controllers\UserSchedulesController;
@@ -19,6 +20,9 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
 
     // home
     $routes->get('/', [HomeController::class,'index'], ['as' => 'super.home']);
+    $routes->get('schedules/new', [SchedulesController::class, 'new'], ['as' => 'super.schedules.new']);
+    $routes->post('schedules/create', [SchedulesController::class, 'create'], ['as' => 'super.schedules.create']);
+    $routes->delete('schedules/cancel/(:num)', [SchedulesController::class, 'cancel/$1'], ['as' => 'super.schedules.cancel']);
 
     // rotas de unidades
     $routes->group('units', static function ($routes) {
@@ -53,11 +57,11 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
 // rotas de agendamentos do user logado
     $routes->group('schedules', static function ($routes) {
 
-        $routes->get('/', [SchedulesController::class,'index'], ['as' => 'schedules.new']);
-        $routes->get('services', [SchedulesController::class,'unitServices'], ['as' => 'get.unit.services']); // recuperamos via fetch API os serviços da unidade
-        $routes->get('calendar', [SchedulesController::class,'getCalendar'], ['as' => 'get.calendar']); // recuperamos via fetch API o calendário para o mês desejado
-        $routes->get('hours', [SchedulesController::class,'getHours'], ['as' => 'get.hours']); // recuperamos via fetch API os horários disponíveis
-        $routes->post('create', [SchedulesController::class,'createSchedule'], ['as' => 'create.schedule']); // criamos o agendamento via fetch API
+        $routes->get('/', [FrontSchedulesController::class,'index'], ['as' => 'schedules.new']);
+        $routes->get('services', [FrontSchedulesController::class,'unitServices'], ['as' => 'get.unit.services']); // recuperamos via fetch API os serviços da unidade
+        $routes->get('calendar', [FrontSchedulesController::class,'getCalendar'], ['as' => 'get.calendar']); // recuperamos via fetch API o calendário para o mês desejado
+        $routes->get('hours', [FrontSchedulesController::class,'getHours'], ['as' => 'get.hours']); // recuperamos via fetch API os horários disponíveis
+        $routes->post('create', [FrontSchedulesController::class,'createSchedule'], ['as' => 'create.schedule']); // criamos o agendamento via fetch API
         
         $routes->group('my', static function ($routes) {
 

@@ -84,6 +84,14 @@
             height: 80px;
         }
         .topbar .text-gray-600 { color: var(--salon-ink) !important; font-weight: 600; }
+        .topbar .nav-link {
+            color: var(--salon-rose-dark) !important;
+            font-weight: 700;
+        }
+        .topbar .nav-link:hover,
+        .topbar .nav-link:focus {
+            color: var(--salon-ink) !important;
+        }
         .container-fluid { padding-left: 2rem; padding-right: 2rem; }
         .card {
             background: rgba(255, 255, 255, .9);
@@ -235,6 +243,13 @@
                     <span>Serviços</span></a>
             </li>
 
+            <!-- Item de navegação - Novo agendamento -->
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo route_to('super.schedules.new'); ?>">
+                    <i class="fas fa-fw fa-calendar-plus"></i>
+                    <span>Novo agendamento</span></a>
+            </li>
+
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -291,33 +306,13 @@
                         
                         <div class="topbar-divider d-none d-sm-block"></div>
 
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo auth()->user()->username; ?></span>
+                        <!-- Informações da conta -->
+                        <li class="nav-item d-flex align-items-center">
+                            <span class="mr-3 d-none d-lg-inline text-gray-600 small"><?php echo auth()->user()->username; ?></span>
+                            <a class="nav-link" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-1"></i>
+                                Sair
                             </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Perfil
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Configurações
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Registro de atividades
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Sair
-                                </a>
-                            </div>
                         </li>
 
                     </ul>

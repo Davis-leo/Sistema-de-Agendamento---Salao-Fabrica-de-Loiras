@@ -96,7 +96,28 @@ class UnitService extends MyBaseService
                             <strong>Endereço: </strong>{$schedule->address}     <br>
                             <strong>Serviço:  </strong>{$schedule->service}     <br>
                             <strong>Situação: </strong>{$schedule->situation()} <br>
-                            <strong>Usuário:  </strong>{$schedule->user}        <br>
+                           <strong>Cliente:  </strong>{$schedule->user}        <br>
+                            <strong>Telefone: </strong>{$schedule->customer_phone} <br>";
+
+            if ((int) $schedule->created_by === (int) auth()->user()->id && $schedule->user_id === null && $schedule->canBeCanceled()) {
+
+                $list[count($list) - 1] .= form_open(
+                    route_to('super.schedules.cancel', $schedule->id),
+                    [
+                        'class' => 'd-inline',
+                        'onsubmit' => 'return confirm("Deseja cancelar este agendamento?");',
+                    ],
+                    hidden: ['_method' => 'DELETE']
+                );
+                $list[count($list) - 1] .= form_button([
+                    'class' => 'btn btn-sm btn-outline-primary mt-2',
+                    'type' => 'submit',
+                    'content' => 'Cancelar agendamento',
+                ]);
+                $list[count($list) - 1] .= form_close();
+            }
+
+            $list[count($list) - 1] .= "
                        </p>";
         }
 
