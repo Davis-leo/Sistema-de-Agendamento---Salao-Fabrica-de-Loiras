@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use App\Entities\Unit;
+use App\Models\ScheduleModel;
 use App\Models\UnitModel;
 use CodeIgniter\Config\Factories;
 
@@ -72,6 +73,39 @@ class UnitService extends MyBaseService
     }
 
     /**
+     * Renderiza uma lista não ordenada HTML dos agendamentos da unidade
+     * @param integer|string $unitId
+     * @return void
+     */
+    public function renderUnitSchedules(int|string $unitId): string{
+
+        // Buscamos os agendamentos
+        $schedules = model(ScheduleModel::class)->getUnitSchedules($unitId);
+
+        if(empty($schedules)){
+
+            return self::TEXT_FOR_NO_DATA;
+        }
+
+        $list = [];
+
+        foreach($schedules as $schedule){
+
+            $list[] = "<p>
+                            <strong>Unidade:  </strong>{$schedule->unit}        <br>
+                            <strong>Endereço: </strong>{$schedule->address}     <br>
+                            <strong>Serviço:  </strong>{$schedule->service}     <br>
+                            <strong>Situação: </strong>{$schedule->situation()} <br>
+                            <strong>Usuário:  </strong>{$schedule->user}        <br>
+                       </p>";
+        }
+
+        // Retorno a lista HTML
+        return ul($list);
+    }
+
+
+    /**
      * Renderiza os dropdowns com as ações possíveis para cada registro
      * @param Unit $unit
      * @return string
@@ -87,6 +121,7 @@ class UnitService extends MyBaseService
         $btnActions .= '<ul class="dropdown-menu">';
         $btnActions .= anchor(route_to('units.edit', $unit->id), 'Editar', ['class' => 'dropdown-item']);
         $btnActions .= anchor(route_to('units.services', $unit->id), 'Serviços', ['class' => 'dropdown-item']);
+        $btnActions .= anchor(route_to('units.schedules', $unit->id), 'Agendamentos', ['class' => 'dropdown-item']);
         $btnActions .= view_cell(
             library: 'ButtonsCell::action', 
             params: [

@@ -70,6 +70,10 @@ class UserSchedulesController extends BaseController
 
             $this->checkMethod('ajax');
 
+            $request = (array) $this->request->getJSON();
+
+            $this->userScheduleService->cancelUserSchedule((int) $request['schedule']);
+
             return $this->response->setJSON([
                 'success' => true,
                 'token'   => csrf_hash(),

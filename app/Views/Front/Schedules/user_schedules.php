@@ -108,7 +108,7 @@
 
                 button.innerText = 'Cancelando...';
 
-                tryCancelUserSchedule();
+                tryCancelUserSchedule(schedule);
             });
         });
     };
@@ -121,7 +121,7 @@
 
         const body = {
 
-            schedule: schedule
+            schedule: parseInt(schedule)
         };
 
         body[csrfTokenName] = csrfTokenValue;

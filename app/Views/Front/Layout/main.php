@@ -288,6 +288,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo route_to('schedules.my'); ?>">Meus Agendamentos</a>
                         </li>
+                        <?php if (auth()->loggedIn() && auth()->user()->inGroup('superadmin')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo route_to('super.home'); ?>">Administração</a>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                     <div class="d-flex">
                         <ul class="navbar-nav me-auto mb-2 mb-md-0">

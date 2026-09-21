@@ -77,7 +77,10 @@ class ScheduleModel extends MyBaseModel
     public function chosenDateisFree(int|string $unitId, string $chosenDate): bool
     {
 
-        return $this->where('unit_id', $unitId)->where('chosen_date', $chosenDate)->first() === null;
+        return $this->where('unit_id', $unitId)
+            ->where('chosen_date', $chosenDate)
+            ->where('canceled', 0)
+            ->first() === null;
     }
 
     /**
@@ -113,6 +116,7 @@ class ScheduleModel extends MyBaseModel
         $this->select('DATE_FORMAT(chosen_date, "%H:%i") AS hour'); //terei: 15:10
         $this->where('unit_id', $unitId);
         $this->where('finished', 0); // agendamento em aberto
+        $this->where('canceled', 0); // agendamento não cancelado
         $this->where('DATE_FORMAT(chosen_date, "%Y-%m-%d")', $dateWanted); // apenas de acordo com a data desejada
 
         $result = $this->findAll();
@@ -146,6 +150,32 @@ class ScheduleModel extends MyBaseModel
         $this->join('units', 'units.id = schedules.unit_id');
         $this->join('services', 'services.id = schedules.service_id');
         $this->where('schedules.user_id', auth()->user()->id); // do user logado
+        $this->orderBy('schedules.id', 'DESC');
+
+        return $this->findAll();
+    }
+
+    /**
+     * Recupera os agendamentos da unidade
+     * @param integer|string $unitId
+     * @return array
+     */
+    public function getUnitSchedules (int|string $unitId): array 
+    {        
+        
+        $this->select([
+            'schedules.*',
+            'DATE_FORMAT(schedules.chosen_date, "%d/%m/%Y às %H:%i") AS formated_chosen_date', // 23/03/2026 às 15:15
+            'units.name AS unit',
+            'units.address',
+            'services.name AS service',
+            'users.username AS user',
+        ]);
+
+        $this->join('units', 'units.id = schedules.unit_id');
+        $this->join('services', 'services.id = schedules.service_id');
+        $this->join('users', 'users.id = schedules.user_id');
+        $this->where('schedules.unit_id', $unitId);
         $this->orderBy('schedules.id', 'DESC');
 
         return $this->findAll();
