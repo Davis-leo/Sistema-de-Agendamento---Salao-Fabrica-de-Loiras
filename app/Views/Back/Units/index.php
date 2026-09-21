@@ -3,7 +3,7 @@
 
 <?php echo $this->section('title'); ?>
 
-<?php echo $title ?? 'Home'; ?>
+<?php echo $title ?? 'Início'; ?>
 
 <?php echo $this->endSection(); ?>
 

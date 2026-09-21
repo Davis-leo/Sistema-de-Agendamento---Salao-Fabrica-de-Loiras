@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
 
@@ -21,6 +21,168 @@
     <!-- Custom styles for this template-->
     <link href="<?php echo base_url('back/'); ?>css/sb-admin-2.min.css" rel="stylesheet">
 
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+        :root {
+            --salon-ink: #2e2927;
+            --salon-muted: #766d68;
+            --salon-cream: #fbf7f2;
+            --salon-sand: #f1e7dc;
+            --salon-rose: #b85c5b;
+            --salon-rose-dark: #914646;
+            --salon-line: rgba(82, 59, 49, .12);
+            --salon-shadow: 0 18px 45px rgba(74, 48, 37, .10);
+            --salon-display: 'Cormorant Garamond', Georgia, serif;
+            --salon-body: 'Manrope', sans-serif;
+        }
+
+        html, body { min-height: 100%; }
+        body {
+            background: var(--salon-cream);
+            color: var(--salon-ink);
+            font-family: var(--salon-body);
+            letter-spacing: .01em;
+        }
+        body::before {
+            background: linear-gradient(135deg, rgba(229, 192, 177, .28), transparent 42%),
+                linear-gradient(315deg, rgba(242, 225, 203, .42), transparent 38%);
+            content: '';
+            inset: 0;
+            pointer-events: none;
+            position: fixed;
+            z-index: -1;
+        }
+        #wrapper { min-height: 100vh; }
+        #content-wrapper { background: transparent; }
+        #content { min-height: calc(100vh - 80px); }
+        .sidebar { background: #332925 !important; box-shadow: 8px 0 28px rgba(46, 32, 26, .12); }
+        .sidebar .sidebar-brand {
+            color: #fff9f3 !important;
+            font-family: var(--salon-display);
+            font-size: 1.55rem;
+            font-weight: 700;
+        }
+        .sidebar .sidebar-brand-icon, .sidebar .nav-link i { color: #e6a59a; }
+        .sidebar hr.sidebar-divider { border-top-color: rgba(255, 249, 243, .12); }
+        .sidebar .nav-item .nav-link {
+            border-radius: 999px;
+            color: #fff9f3;
+            font-size: .86rem;
+            font-weight: 600;
+            margin: .25rem .75rem;
+            padding: .75rem 1rem;
+        }
+        .sidebar .nav-item .nav-link:hover, .sidebar .nav-item.active .nav-link {
+            background: rgba(255, 255, 255, .12);
+            color: #fff9f3;
+        }
+        .topbar {
+            background: rgba(255, 255, 255, .88) !important;
+            border-bottom: 1px solid var(--salon-line);
+            box-shadow: 0 5px 24px rgba(46, 32, 26, .08) !important;
+            height: 80px;
+        }
+        .topbar .text-gray-600 { color: var(--salon-ink) !important; font-weight: 600; }
+        .container-fluid { padding-left: 2rem; padding-right: 2rem; }
+        .card {
+            background: rgba(255, 255, 255, .9);
+            border: 1px solid var(--salon-line);
+            border-radius: 8px;
+            box-shadow: var(--salon-shadow) !important;
+        }
+        .card-header {
+            align-items: center;
+            background: transparent;
+            border-bottom: 1px solid var(--salon-line);
+            display: flex;
+            justify-content: space-between;
+            padding: 1.35rem 1.5rem;
+        }
+        .card-header h6, .card-header .font-weight-bold {
+            color: var(--salon-ink) !important;
+            font-family: var(--salon-display);
+            font-size: 1.65rem;
+            font-weight: 700 !important;
+            margin: 0;
+        }
+        .card-body { padding: 1.5rem; }
+        h1, h2, h3, h4, h5, h6 { color: var(--salon-ink); font-family: var(--salon-display); }
+        .btn { border-radius: 999px; font-size: .82rem; font-weight: 700; padding: .6rem 1rem; }
+        .btn-primary, .btn-success, .badge-primary {
+            background-color: var(--salon-rose) !important;
+            border-color: var(--salon-rose) !important;
+            color: #fff !important;
+        }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+        .btn-primary:not(:disabled):not(.disabled):active,
+        .btn-success:hover, .btn-success:focus, .btn-success:active,
+        .btn-success:not(:disabled):not(.disabled):active,
+        .badge-primary:hover, .badge-primary:focus {
+            background-color: var(--salon-rose-dark) !important;
+            border-color: var(--salon-rose-dark) !important;
+            color: #fff !important;
+            box-shadow: 0 0 0 .2rem rgba(184, 92, 91, .18) !important;
+        }
+        .badge-status-active, .badge-status-inactive {
+            border-radius: 999px;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            padding: .45rem .7rem;
+        }
+        .badge-status-active {
+            background-color: #3f8062 !important;
+            color: #fff !important;
+        }
+        .badge-status-inactive {
+            background-color: #766d68 !important;
+            color: #fff !important;
+        }
+        .btn-secondary, .btn-outline-primary {
+            background-color: transparent !important;
+            color: var(--salon-rose-dark) !important;
+            border-color: rgba(145, 70, 70, .4) !important;
+        }
+        .btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active,
+        .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+            background-color: var(--salon-rose-dark) !important;
+            border-color: var(--salon-rose-dark) !important;
+            color: #fff !important;
+            box-shadow: 0 0 0 .2rem rgba(184, 92, 91, .18) !important;
+        }
+        .table { color: var(--salon-ink); margin-bottom: 0; }
+        .table thead th {
+            background: var(--salon-sand); border-bottom: 0; color: var(--salon-rose-dark);
+            font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+        }
+        .table td, .table th { border-color: var(--salon-line); padding: .9rem .75rem; vertical-align: middle; }
+        .table tbody tr:hover { background: rgba(241, 231, 220, .42); }
+        .dropdown-menu { border: 1px solid var(--salon-line); border-radius: 8px; box-shadow: var(--salon-shadow); padding: .4rem; }
+        .dropdown-item { border-radius: 5px; color: var(--salon-ink); font-size: .82rem; padding: .55rem .75rem; }
+        .dropdown-item:hover { background: var(--salon-sand); color: var(--salon-rose-dark); }
+        label { color: var(--salon-ink); font-size: .82rem; font-weight: 700; }
+        .form-control, .custom-select {
+            background-color: #fffdfb; border: 1px solid rgba(82, 59, 49, .2); border-radius: 5px;
+            color: var(--salon-ink); font-family: var(--salon-body); min-height: 44px;
+        }
+        .form-control:focus, .custom-select:focus { border-color: var(--salon-rose); box-shadow: 0 0 0 .2rem rgba(184, 92, 91, .14); }
+        .alert { border: 0; border-left: 4px solid var(--salon-rose); border-radius: 5px; box-shadow: 0 8px 20px rgba(74, 48, 37, .07); }
+        .card-body > ul { list-style: none; margin: 0; padding: 0; }
+        .card-body > ul > li { background: var(--salon-sand); border-left: 4px solid var(--salon-rose); border-radius: 5px; margin-bottom: .75rem; padding: 1rem 1.15rem; }
+        .card-body > ul > li p { color: var(--salon-muted); line-height: 1.7; margin: 0; }
+        .card-body > ul > li strong { color: var(--salon-ink); }
+        .sticky-footer { background: transparent !important; color: var(--salon-muted); }
+        @media (max-width: 767.98px) {
+            .sidebar { width: 6.5rem; }
+            .sidebar .sidebar-brand-text, .sidebar .nav-link span { display: none; }
+            .sidebar .nav-item .nav-link { margin-left: .5rem; margin-right: .5rem; text-align: center; }
+            .container-fluid { padding-left: 1rem; padding-right: 1rem; }
+            .card-header { align-items: flex-start; flex-direction: column; gap: .8rem; }
+            .card-header .btn { float: none !important; }
+        }
+    </style>
+
 
     <!-- Aqui é o espaço reservado para apresentar css específico das views que extendem esse template -->
     <?php echo $this->renderSection('css'); ?>
@@ -38,25 +200,25 @@
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo route_to('super.home'); ?>">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                    <i class="fas fa-cut"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+                <div class="sidebar-brand-text mx-3">Painel do Salão</div>
             </a>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-            <!-- Nav Item - Dashboard -->
+                <!-- Item de navegação - Painel -->
             <li class="nav-item">
                 <a class="nav-link" href="<?php echo route_to('super.home'); ?>">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
+                    <span>Painel</span></a>
             </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Nav Item - Dashboard -->
+            <!-- Item de navegação - Unidades -->
             <li class="nav-item">
                 <a class="nav-link" href="<?php echo route_to('units'); ?>">
                     <i class="fas fa-fw fa-building"></i>
@@ -66,7 +228,7 @@
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Nav Item - Dashboard -->
+            <!-- Item de navegação - Serviços -->
             <li class="nav-item">
                 <a class="nav-link" href="<?php echo route_to('services'); ?>">
                     <i class="fas fa-fw fa-concierge-bell"></i>
@@ -114,7 +276,7 @@
                                 <form class="form-inline mr-auto w-100 navbar-search">
                                     <div class="input-group">
                                         <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
+                                            placeholder="Pesquisar..." aria-label="Pesquisar"
                                             aria-describedby="basic-addon2">
                                         <div class="input-group-append">
                                             <button class="btn btn-primary" type="button">
@@ -140,20 +302,20 @@
                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
+                                    Perfil
                                 </a>
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
+                                    Configurações
                                 </a>
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
+                                    Registro de atividades
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
+                                    Sair
                                 </a>
                             </div>
                         </li>
@@ -178,7 +340,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>&copy; 2026 Fábrica de Loiras - Márcia Marques. Todos os direitos reservados.</span>
                     </div>
                 </div>
             </footer>
@@ -195,21 +357,21 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
+    <!-- Modal de saída -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Deseja sair?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-body">Selecione “Sair” abaixo para encerrar sua sessão.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="<?php echo route_to('logout'); ?>">Logout</a>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <a class="btn btn-primary" href="<?php echo route_to('logout'); ?>">Sair</a>
                 </div>
             </div>
         </div>
