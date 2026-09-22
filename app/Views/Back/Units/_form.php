@@ -14,7 +14,7 @@
 
         <label for="phone">Telefone</label>
 
-        <input type="tel" class="form-control phone_with_ddd" name="phone" value="<?php echo old('phone', $unit->phone ?? ''); ?>" id="phone" placeholder="Telefone">
+        <input type="tel" class="form-control phone_with_ddd" name="phone" value="<?php echo old('phone', $unit->phone ?? ''); ?>" id="phone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" autocomplete="tel" required>
 
         <?php echo show_error_input('phone') ?>
 

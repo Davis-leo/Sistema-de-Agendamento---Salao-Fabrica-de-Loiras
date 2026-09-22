@@ -14,8 +14,7 @@
     <title>Agendamentos | admin | <?php echo $this->renderSection('title'); ?></title>
 
     <!-- Custom fonts for this template-->
-    <link href="<?php echo base_url('back/'); ?>vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
-        type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
@@ -387,11 +386,8 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="<?php echo base_url('back/'); ?>vendor/jquery/jquery.min.js"></script>
-    <script src="<?php echo base_url('back/'); ?>vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="<?php echo base_url('back/'); ?>vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom scripts for all pages-->
     <script src="<?php echo base_url('back/'); ?>js/sb-admin-2.min.js"></script>

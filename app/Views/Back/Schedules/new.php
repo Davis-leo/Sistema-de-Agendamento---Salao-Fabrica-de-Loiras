@@ -39,7 +39,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label for="customer_phone">Telefone</label>
-                    <input type="tel" class="form-control phone_with_ddd" name="customer_phone" id="customer_phone" value="<?php echo old('customer_phone'); ?>" required>
+                    <input type="tel" class="form-control phone_with_ddd" name="customer_phone" id="customer_phone" value="<?php echo old('customer_phone'); ?>" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" autocomplete="tel" required>
                     <?php echo show_error_input('customer_phone'); ?>
                 </div>
                 <div class="form-group col-md-6">
