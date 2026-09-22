@@ -1,0 +1,38 @@
+name: Deploy to Lightsail - 52.67.227.154
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script_stop: true
+          script: |
+            echo "=== Iniciando deploy ==="
+            cd /var/www/html
+            echo "-> git pull"
+            sudo -u www-data git pull origin main
+            if [ -f composer.json ]; then
+              echo "-> composer install"
+              sudo -u www-data composer install --no-dev --optimize-autoloader --no-interaction
+            fi
+            echo "-> permissões"
+            sudo chown -R www-data:www-data .
+            sudo chmod -R 775 writable
+            echo "-> cache e migrate"
+            sudo -u www-data php spark cache:clear || true
+            sudo -u www-data php spark migrate --all || true
+            echo "-> reload apache"
+            sudo systemctl reload apache2
+            echo "=== Deploy finalizado com sucesso ==="
+            sudo -u www-data git log -1 --oneline
