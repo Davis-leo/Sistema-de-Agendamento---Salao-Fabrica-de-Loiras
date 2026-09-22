@@ -3,7 +3,6 @@ name: Deploy to Lightsail - 52.67.227.154
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   deploy:
@@ -12,16 +11,38 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script_stop: true
+          host: 52.67.227.154
+          username: admin
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 10m
           script: |
             echo "=== Iniciando deploy ==="
             cd /var/www/html
-            echo "-> git pull"
+            echo "-> reset para origin/main"
+            sudo -u www-data git fetch origin main
+            sudo -u www-data git reset --hard origin/main
+            sudo -u www-data git clean -fd
+            
+            # recria o deploy.sh manual caso seja apagado pelo clean
+            if [ ! -f deploy.sh ]; then
+            cat > /tmp/deploy.sh <<'EOS'
+            #!/bin/bash
+            set -e
+            cd /var/www/html
             sudo -u www-data git pull origin main
+            sudo chown -R www-data:www-data .
+            sudo chmod -R 775 writable
+            sudo -u www-data php spark cache:clear || true
+            sudo -u www-data php spark migrate --all || true
+            sudo systemctl reload apache2
+            EOS
+            sudo mv /tmp/deploy.sh /var/www/html/deploy.sh
+            sudo chmod +x /var/www/html/deploy.sh
+            sudo chown www-data:www-data /var/www/html/deploy.sh
+            fi
+
             if [ -f composer.json ]; then
               echo "-> composer install"
               sudo -u www-data composer install --no-dev --optimize-autoloader --no-interaction
@@ -34,5 +55,5 @@ jobs:
             sudo -u www-data php spark migrate --all || true
             echo "-> reload apache"
             sudo systemctl reload apache2
-            echo "=== Deploy finalizado com sucesso ==="
+            echo "=== Deploy finalizado ==="
             sudo -u www-data git log -1 --oneline
