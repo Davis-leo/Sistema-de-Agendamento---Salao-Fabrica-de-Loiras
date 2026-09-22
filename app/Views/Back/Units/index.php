@@ -31,7 +31,26 @@
         <div class="card-body">
             <div class="table-responsive">
                 
-                <?php echo $units; ?>
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($units as $unit): ?>
+                            <tr>
+                                <td><?php echo esc($unit->id); ?></td>
+                                <td><?php echo esc($unit->name); ?></td>
+                                <td>
+                                    <a href="<?php echo route_to('units.edit', $unit->id); ?>" class="btn btn-primary btn-sm">Editar</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
 
             </div>
         </div>

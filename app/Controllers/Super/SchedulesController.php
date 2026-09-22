@@ -42,7 +42,7 @@ class SchedulesController extends BaseController
 
         $rules = [
             'customer_name'  => 'required|max_length[120]',
-            'customer_phone' => 'required|max_length[30]',
+            'customer_phone' => 'required|exact_length[15]',
             'customer_email' => 'permit_empty|valid_email|max_length[120]',
             'unit_id'        => 'required|is_natural_no_zero',
             'service_id'     => 'required|is_natural_no_zero',
