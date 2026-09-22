@@ -9,6 +9,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
+    <link rel="icon" href="<?php echo base_url('favicon.ico'); ?>" type="image/x-icon">
+
     <title>Agendamentos | admin | <?php echo $this->renderSection('title'); ?></title>
 
     <!-- Custom fonts for this template-->
