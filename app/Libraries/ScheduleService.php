@@ -13,6 +13,12 @@ use InvalidArgumentException;
 
 class ScheduleService
 {
+    private ProfessionalAvailabilityService $availabilityService;
+
+    public function __construct()
+    {
+        $this->availabilityService = new ProfessionalAvailabilityService();
+    }
     /**
      * Renderiza a lista com as opções de unidades ativas e que possuam serviços associados para serem escolhidos no agendamento.
      * @return string
@@ -82,6 +88,17 @@ class ScheduleService
 
     }
 
+    public function renderProfessionals(int $unitId, int $serviceId, string $chosenDate): string
+    {
+        $unit = model(UnitModel::class)->where('active', 1)->find($unitId);
+        $service = model(ServiceModel::class)->where('active', 1)->find($serviceId);
+        if (!$unit || !$service || !in_array($serviceId, array_map('intval', $unit->services ?? []), true)) {
+            return '<div class="alert alert-warning">Serviço indisponível para esta unidade.</div>';
+        }
+
+        return $this->availabilityService->renderOptions($unitId, $serviceId, $chosenDate);
+    }
+
     /**
      * Tenta criar o agendamento do user logado
      * @param array $request
@@ -101,14 +118,21 @@ class ScheduleService
             // Terei algo assim: 2026-09-16 15:15
             $chosenDate = "{$currentYear}-{$request->month}-{$request->day} {$request->hour}";
 
-            if(! $model->chosenDateisFree(unitId: $request->unit_id, chosenDate: $chosenDate)){
+            $unit = model(UnitModel::class)->where('active', 1)->find($request->unit_id);
+            $service = model(ServiceModel::class)->where('active', 1)->find($request->service_id);
+            if (!$unit || !$service || !in_array((int) $request->service_id, array_map('intval', $unit->services ?? []), true)) {
+                return 'A unidade ou o serviço selecionado não está disponível';
+            }
 
-                return "A data escolhida não está mais disponível";
+            if (empty($request->professional_id) || !$this->availabilityService->isAvailable((int) $request->unit_id, (int) $request->professional_id, (int) $request->service_id, $chosenDate)) {
+
+                return "O profissional escolhido não está mais disponível nesse horário";
             }
 
             $schedule = new Schedule([
                 'unit_id'     => $request->unit_id,
                 'service_id'  => $request->service_id,
+                'professional_id' => $request->professional_id,
                 'chosen_date' => $chosenDate,
             ]);
 

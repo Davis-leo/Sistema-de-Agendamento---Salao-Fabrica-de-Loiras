@@ -95,11 +95,12 @@ class UnitService extends MyBaseService
                             <strong>Unidade:  </strong>{$schedule->unit}        <br>
                             <strong>Endereço: </strong>{$schedule->address}     <br>
                             <strong>Serviço:  </strong>{$schedule->service}     <br>
+                            <strong>Profissional: </strong>{$schedule->professional} <br>
                             <strong>Situação: </strong>{$schedule->situation()} <br>
                            <strong>Cliente:  </strong>{$schedule->user}        <br>
                             <strong>Telefone: </strong>{$schedule->customer_phone} <br>";
 
-            if ((int) $schedule->created_by === (int) auth()->user()->id && $schedule->user_id === null && $schedule->canBeCanceled()) {
+            if (!$schedule->canceled && !$schedule->finished) {
 
                 $list[count($list) - 1] .= form_open(
                     route_to('super.schedules.cancel', $schedule->id),
@@ -114,6 +115,13 @@ class UnitService extends MyBaseService
                     'type' => 'submit',
                     'content' => 'Cancelar agendamento',
                 ]);
+                $list[count($list) - 1] .= form_close();
+            }
+
+            if (!$schedule->canceled && !$schedule->confirmed) {
+                $list[count($list) - 1] .= form_open(route_to('super.schedules.confirm', $schedule->id), ['class' => 'd-inline ml-2']);
+                $list[count($list) - 1] .= '<input type="number" name="service_amount" min="0" step="0.01" class="form-control form-control-sm d-inline-block" style="max-width:130px" placeholder="Valor" required>';
+                $list[count($list) - 1] .= form_button(['class' => 'btn btn-sm btn-primary mt-2', 'type' => 'submit', 'content' => 'Confirmar atendimento']);
                 $list[count($list) - 1] .= form_close();
             }
 

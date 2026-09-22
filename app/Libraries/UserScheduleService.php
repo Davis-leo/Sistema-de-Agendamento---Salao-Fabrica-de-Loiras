@@ -48,7 +48,8 @@ class UserScheduleService
             }
 
             $ul .= "<div class='ms-2 me-auto'><div class='fw-bold'>{$schedule->unit} {$schedule->address}</div>
-                   {$schedule->service}
+                   {$schedule->service}<br>
+                   Profissional: {$schedule->professional}
                    <p>{$btnCancel}</p>
                    </div>";
             

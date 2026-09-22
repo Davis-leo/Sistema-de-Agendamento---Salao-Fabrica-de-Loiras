@@ -43,6 +43,11 @@
                     <?php echo show_error_input('customer_phone'); ?>
                 </div>
                 <div class="form-group col-md-6">
+                    <label for="customer_email">E-mail do cliente (opcional)</label>
+                    <input type="email" class="form-control" name="customer_email" id="customer_email" value="<?php echo old('customer_email'); ?>">
+                    <?php echo show_error_input('customer_email'); ?>
+                </div>
+                <div class="form-group col-md-6">
                     <label for="unit_id">Unidade</label>
                     <select class="form-control" name="unit_id" id="unit_id" required>
                         <option value="">Selecione uma unidade</option>
@@ -53,6 +58,16 @@
                         <?php endforeach; ?>
                     </select>
                     <?php echo show_error_input('unit_id'); ?>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="professional_id">Profissional</label>
+                    <select class="form-control" name="professional_id" id="professional_id" required>
+                        <option value="">Selecione um profissional</option>
+                        <?php foreach ($professionals as $professional): ?>
+                            <option value="<?php echo $professional->id; ?>" <?php echo old('professional_id') == $professional->id ? 'selected' : ''; ?>><?php echo esc($professional->name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php echo show_error_input('professional_id'); ?>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="service_id">Serviço</label>

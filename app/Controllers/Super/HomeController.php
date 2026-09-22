@@ -21,16 +21,60 @@ class HomeController extends BaseController
                 'DATE_FORMAT(schedules.chosen_date, "%d/%m/%Y às %H:%i") AS formated_chosen_date',
                 'units.name AS unit',
                 'services.name AS service',
+                'professionals.name AS professional',
                 'COALESCE(users.username, schedules.customer_name) AS user',
             ])
             ->join('units', 'units.id = schedules.unit_id')
             ->join('services', 'services.id = schedules.service_id')
+            ->join('professionals', 'professionals.id = schedules.professional_id', 'left')
             ->join('users', 'users.id = schedules.user_id', 'left')
             ->where('schedules.canceled', 0)
             ->where('schedules.finished', 0)
             ->where('schedules.chosen_date >=', Time::now()->toDateTimeString())
             ->orderBy('schedules.chosen_date', 'ASC')
             ->findAll(5);
+
+        $weekStart = date('Y-m-d', strtotime('monday this week'));
+        $weekEnd = date('Y-m-d', strtotime('sunday this week'));
+        $weeklyCommissions = $scheduleModel
+            ->select('professionals.name AS professional, COUNT(schedules.id) AS appointments, SUM(schedules.commission_amount) AS total')
+            ->join('professionals', 'professionals.id = schedules.professional_id')
+            ->where('schedules.confirmed', 1)
+            ->where('schedules.canceled', 0)
+            ->where('DATE(schedules.confirmed_at) >=', $weekStart)
+            ->where('DATE(schedules.confirmed_at) <=', $weekEnd)
+            ->groupBy('schedules.professional_id')
+            ->orderBy('professionals.name', 'ASC')
+            ->findAll();
+
+        $unitFinancialRows = model(ScheduleModel::class)
+            ->select('schedules.unit_id, SUM(schedules.service_amount) AS gross_amount, SUM(schedules.commission_amount) AS commission_amount')
+            ->join('units', 'units.id = schedules.unit_id')
+            ->where('schedules.confirmed', 1)
+            ->where('schedules.canceled', 0)
+            ->where('DATE(schedules.confirmed_at) >=', $weekStart)
+            ->where('DATE(schedules.confirmed_at) <=', $weekEnd)
+            ->groupBy('schedules.unit_id')
+            ->findAll();
+
+        $financialByUnit = [];
+        foreach ($unitFinancialRows as $row) {
+            $financialByUnit[(int) $row->unit_id] = [
+                'gross' => (float) $row->gross_amount,
+                'commission' => (float) $row->commission_amount,
+            ];
+        }
+
+        $unitFinancials = [];
+        foreach (model(UnitModel::class)->where('active', 1)->orderBy('name', 'ASC')->findAll() as $unit) {
+            $financial = $financialByUnit[(int) $unit->id] ?? ['gross' => 0.0, 'commission' => 0.0];
+            $unitFinancials[] = (object) [
+                'name' => $unit->name,
+                'gross' => $financial['gross'],
+                'commission' => $financial['commission'],
+                'net' => $financial['gross'] - $financial['commission'],
+            ];
+        }
 
         $data = [
             'title'             => 'Painel',
@@ -39,6 +83,10 @@ class HomeController extends BaseController
             'totalSchedules'    => $scheduleModel->countAllResults(),
             'canceledSchedules' => $scheduleModel->where('canceled', 1)->countAllResults(),
             'nextSchedules'     => $nextSchedules,
+            'weeklyCommissions' => $weeklyCommissions,
+            'weekStart'         => $weekStart,
+            'weekEnd'           => $weekEnd,
+            'unitFinancials'    => $unitFinancials,
         ];   
 
         return view('Back/Home/index', $data);

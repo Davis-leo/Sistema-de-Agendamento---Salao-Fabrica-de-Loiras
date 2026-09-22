@@ -328,8 +328,8 @@
     </main>
 
     <footer class="footer mt-auto py-3 bg-light">
-        <div class="container">
-            <span class="text-muted">Place sticky footer content here.</span>
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2026 Fábrica de Loiras - Márcia Marques. Todos os direitos reservados.</span>
         </div>
     </footer>
 

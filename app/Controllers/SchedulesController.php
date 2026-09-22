@@ -116,6 +116,24 @@ class SchedulesController extends BaseController
         }
     }
 
+    public function professionals()
+    {
+        try {
+            $this->checkMethod('ajax');
+            $date = sprintf('%s-%02d-%02d %s', date('Y'), (int) $this->request->getGet('month'), (int) $this->request->getGet('day'), $this->request->getGet('hour'));
+            return $this->response->setJSON([
+                'professionals' => $this->scheduleService->renderProfessionals(
+                    (int) $this->request->getGet('unit_id'),
+                    (int) $this->request->getGet('service_id'),
+                    $date
+                ),
+            ]);
+        } catch (\Throwable $th) {
+            log_message('error', '[ERROR] {exception}', ['exception' => $th]);
+            return $this->response->setStatusCode(500)->setJSON(['error' => 'Não foi possível recuperar os profissionais.']);
+        }
+    }
+
     /**
      * Tenta criar o agendamento
      * @return ResponseInterface

@@ -54,9 +54,9 @@ class Auth extends ShieldAuth
         'action_email_2fa_email'      => '\App\Views\Auth\email_2fa_email',
         'action_email_activate_show'  => '\App\Views\Auth\email_activate_show',
         'action_email_activate_email' => '\App\Views\Auth\email_activate_email',
-        'magic-link-login'            => '\CodeIgniter\Shield\Views\magic_link_form',
-        'magic-link-message'          => '\CodeIgniter\Shield\Views\magic_link_message',
-        'magic-link-email'            => '\CodeIgniter\Shield\Views\Email\magic_link_email',
+        'magic-link-login'            => '\App\Views\Auth\magic_link_form',
+        'magic-link-message'          => '\App\Views\Auth\magic_link_message',
+        'magic-link-email'            => '\App\Views\Auth\magic_link_email',
     ];
 
     /**
@@ -104,7 +104,7 @@ class Auth extends ShieldAuth
      * @var array<string, class-string<ActionInterface>|null>
      */
     public array $actions = [
-        'register' => \CodeIgniter\Shield\Authentication\Actions\EmailActivator::class,
+        'register' => \App\Authentication\Actions\EmailActivator::class,
         'login'    => null,
     ];
 

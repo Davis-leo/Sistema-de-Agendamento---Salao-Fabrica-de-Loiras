@@ -210,7 +210,7 @@
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-cut"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Painel do Salão</div>
+                <div class="sidebar-brand-text mx-3">Painel</div>
             </a>
 
             <!-- Divider -->
@@ -241,6 +241,18 @@
                 <a class="nav-link" href="<?php echo route_to('services'); ?>">
                     <i class="fas fa-fw fa-concierge-bell"></i>
                     <span>Serviços</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo route_to('professionals'); ?>">
+                    <i class="fas fa-fw fa-user-tie"></i>
+                    <span>Profissionais</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo route_to('commissions'); ?>">
+                    <i class="fas fa-fw fa-coins"></i>
+                    <span>Comissões</span></a>
             </li>
 
             <!-- Item de navegação - Novo agendamento -->

@@ -45,6 +45,7 @@ class CanceledScheduleNotification
             'chosen_date' => $this->schedule->chosen_date,
             'unit'        => $this->schedule->unit,
             'service'     => $this->schedule->service,
+            'professional'=> $this->schedule->professional,
             'address'     => $this->schedule->address,
             'when'        => Time::now()->format('d/m/Y H:i'),
         ];

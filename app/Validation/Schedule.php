@@ -26,6 +26,15 @@ class Schedule
                 ],
             ],
 
+            'professional_id' => [
+                'rules'  => 'required|is_natural_no_zero|is_not_unique[professionals.id]',
+                'errors' => [
+                    'required'           => 'Escolha um profissional',
+                    'is_natural_no_zero' => 'Profissional inválido',
+                    'is_not_unique'      => 'Profissional inválido',
+                ],
+            ],
+
             'month' => [
 
                 'rules'  => 'required|max_length[2]',

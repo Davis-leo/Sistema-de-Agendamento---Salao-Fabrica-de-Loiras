@@ -62,6 +62,12 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="padding:24px 0 0;">
+                                        <p style="margin:0 0 7px; color:#766d68; font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Profissional</p>
+                                        <p style="margin:0; color:#2e2927; font-size:16px; line-height:1.5;"><?php echo $professional; ?></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding:24px 0 0;">
                                         <p style="margin:0 0 7px; color:#766d68; font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Endereço</p>
                                         <p style="margin:0; color:#2e2927; font-size:16px; line-height:1.5;"><?php echo $address; ?></p>
                                     </td>

@@ -46,7 +46,7 @@
     .dashboard-stats {
         display: grid;
         gap: 1rem;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         margin-bottom: 1.5rem;
     }
 
@@ -157,6 +157,38 @@
         text-align: center;
     }
 
+    .unit-financials {
+        display: grid;
+        gap: .8rem;
+    }
+
+    .unit-financial-row {
+        border-bottom: 1px solid var(--salon-line);
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: minmax(150px, 1.2fr) repeat(3, minmax(100px, 1fr));
+        padding: .85rem 0;
+    }
+
+    .unit-financial-row:last-child { border-bottom: 0; }
+
+    .unit-financial-label {
+        color: var(--salon-muted);
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .unit-financial-value {
+        color: var(--salon-ink);
+        font-size: .9rem;
+        font-weight: 700;
+        margin-top: .25rem;
+    }
+
+    .unit-financial-net .unit-financial-value { color: #3f8062; }
+
     .dashboard-actions {
         display: grid;
         gap: .75rem;
@@ -195,6 +227,8 @@
         .dashboard-stat-value { font-size: 2rem; }
         .schedule-row { gap: .35rem; grid-template-columns: 1fr auto; }
         .schedule-time { grid-column: 1 / -1; }
+        .unit-financial-row { grid-template-columns: 1fr 1fr; }
+        .unit-financial-row > div:first-child { grid-column: 1 / -1; }
     }
 </style>
 
@@ -219,6 +253,11 @@
             <div class="dashboard-stat-label">Unidades ativas</div>
             <div class="dashboard-stat-value"><?php echo $activeUnits; ?></div>
             <div class="dashboard-stat-detail">Locais em funcionamento</div>
+        </div>
+        <div class="dashboard-stat">
+            <div class="dashboard-stat-label">Comissões da semana</div>
+            <div class="dashboard-stat-value">R$ <?php echo number_format(array_sum(array_map(static fn ($item) => (float) $item->total, $weeklyCommissions)), 2, ',', '.'); ?></div>
+            <div class="dashboard-stat-detail">Atendimentos confirmados</div>
         </div>
         <div class="dashboard-stat">
             <div class="dashboard-stat-label">Serviços ativos</div>
@@ -252,12 +291,48 @@
                         <div class="schedule-time"><?php echo esc($schedule->formated_chosen_date); ?></div>
                         <div>
                             <div class="schedule-service"><?php echo esc($schedule->service); ?></div>
-                            <div class="schedule-meta"><?php echo esc($schedule->unit); ?></div>
+                            <div class="schedule-meta"><?php echo esc($schedule->unit); ?> · <?php echo esc($schedule->professional ?: 'Profissional não definido'); ?></div>
                         </div>
                         <div class="schedule-user"><?php echo esc($schedule->user); ?></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-header">
+                <h2>Resultado por unidade</h2>
+                <span><?php echo date('d/m', strtotime($weekStart)); ?> a <?php echo date('d/m', strtotime($weekEnd)); ?></span>
+            </div>
+            <div class="unit-financials">
+                <div class="unit-financial-row">
+                    <div class="unit-financial-label">Unidade</div>
+                    <div class="unit-financial-label">Bruto</div>
+                    <div class="unit-financial-label">Comissão</div>
+                    <div class="unit-financial-label">Líquido</div>
+                </div>
+                <?php if (empty($unitFinancials)): ?>
+                    <div class="dashboard-empty">Nenhuma unidade ativa cadastrada.</div>
+                <?php else: ?>
+                    <?php foreach ($unitFinancials as $unitFinancial): ?>
+                        <div class="unit-financial-row">
+                            <div class="unit-financial-value"><?php echo esc($unitFinancial->name); ?></div>
+                            <div>
+                                <div class="unit-financial-label">Faturamento bruto</div>
+                                <div class="unit-financial-value">R$ <?php echo number_format($unitFinancial->gross, 2, ',', '.'); ?></div>
+                            </div>
+                            <div>
+                                <div class="unit-financial-label">A pagar</div>
+                                <div class="unit-financial-value">R$ <?php echo number_format($unitFinancial->commission, 2, ',', '.'); ?></div>
+                            </div>
+                            <div class="unit-financial-net">
+                                <div class="unit-financial-label">Resultado líquido</div>
+                                <div class="unit-financial-value">R$ <?php echo number_format($unitFinancial->net, 2, ',', '.'); ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </section>
 
         <section class="dashboard-panel">
@@ -286,7 +361,33 @@
                     <span>Cadastrar serviço</span>
                     <i class="fas fa-plus"></i>
                 </a>
+                <a class="dashboard-action" href="<?php echo route_to('professionals'); ?>">
+                    <span>Gerenciar profissionais</span>
+                    <i class="fas fa-user-tie"></i>
+                </a>
+                <a class="dashboard-action" href="<?php echo route_to('commissions'); ?>">
+                    <span>Ver comissões</span>
+                    <i class="fas fa-coins"></i>
+                </a>
             </div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-header">
+                <h2>Comissões por profissional</h2>
+                <span><?php echo date('d/m', strtotime($weekStart)); ?> a <?php echo date('d/m', strtotime($weekEnd)); ?></span>
+            </div>
+            <?php if (empty($weeklyCommissions)): ?>
+                <div class="dashboard-empty">Nenhuma comissão confirmada nesta semana.</div>
+            <?php else: ?>
+                <?php foreach ($weeklyCommissions as $commission): ?>
+                    <div class="schedule-row">
+                        <div class="schedule-service"><?php echo esc($commission->professional); ?></div>
+                        <div class="schedule-meta"><?php echo (int) $commission->appointments; ?> atendimento(s)</div>
+                        <div class="schedule-user">R$ <?php echo number_format((float) $commission->total, 2, ',', '.'); ?></div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </section>
     </div>
 

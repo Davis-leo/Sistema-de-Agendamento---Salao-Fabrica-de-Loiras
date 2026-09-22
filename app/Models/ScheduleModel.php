@@ -16,12 +16,22 @@ class ScheduleModel extends MyBaseModel
     protected $allowedFields    = [
         'unit_id',
         'service_id',
+        'professional_id',
         'user_id',
         'customer_name',
         'customer_phone',
+        'customer_email',
         'created_by',
         'finished',
         'canceled',   
+        'confirmed',
+        'service_amount',
+        'commission_percentage',
+        'commission_amount',
+        'confirmed_at',
+        'confirmed_by',
+        'canceled_by',
+        'cancel_reason',
         'chosen_date',     
     ];
 
@@ -103,10 +113,12 @@ class ScheduleModel extends MyBaseModel
             'units.name AS unit',
             'units.address',
             'services.name AS service',
+            'professionals.name AS professional',
         ]);
 
         $this->join('units', 'units.id = schedules.unit_id');
         $this->join('services', 'services.id = schedules.service_id');
+        $this->join('professionals', 'professionals.id = schedules.professional_id', 'left');
 
         return $this-> findorFail($id);
     }
@@ -152,10 +164,12 @@ class ScheduleModel extends MyBaseModel
             'units.name AS unit',
             'units.address',
             'services.name AS service',
+            'professionals.name AS professional',
         ]);
 
         $this->join('units', 'units.id = schedules.unit_id');
         $this->join('services', 'services.id = schedules.service_id');
+        $this->join('professionals', 'professionals.id = schedules.professional_id', 'left');
         $this->where('schedules.user_id', auth()->user()->id); // do user logado
         $this->orderBy('schedules.id', 'DESC');
 
@@ -176,12 +190,14 @@ class ScheduleModel extends MyBaseModel
             'units.name AS unit',
             'units.address',
             'services.name AS service',
+            'professionals.name AS professional',
             'COALESCE(users.username, schedules.customer_name) AS user',
             'schedules.customer_phone',
         ]);
 
         $this->join('units', 'units.id = schedules.unit_id');
         $this->join('services', 'services.id = schedules.service_id');
+        $this->join('professionals', 'professionals.id = schedules.professional_id', 'left');
         $this->join('users', 'users.id = schedules.user_id', 'left');
         $this->where('schedules.unit_id', $unitId);
         $this->orderBy('schedules.id', 'DESC');

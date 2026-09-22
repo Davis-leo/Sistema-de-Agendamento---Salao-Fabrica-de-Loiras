@@ -11,6 +11,10 @@ class Schedule extends Entity
     protected $casts   = [
         'finished' => 'boolean',
         'canceled' => 'boolean',
+        'confirmed' => 'boolean',
+        'service_amount' => 'float',
+        'commission_percentage' => 'float',
+        'commission_amount' => 'float',
     ];
 
     public function updatedAt(): string {
@@ -26,6 +30,10 @@ class Schedule extends Entity
 
         if($this->canceled){
             return "Cancelado em {$this->updatedAt()}";
+        }
+
+        if($this->confirmed){
+            return "Confirmado em {$this->updatedAt()}";
         }
 
         $isBefore = Time::parse($this->chosen_date)->isBefore(Time::now());

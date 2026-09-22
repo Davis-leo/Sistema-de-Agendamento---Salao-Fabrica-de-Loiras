@@ -2,7 +2,6 @@
 
 namespace App\Libraries;
 
-use App\Models\ScheduleModel;
 use App\Models\UnitModel;
 use CodeIgniter\I18n\Time;
 use DateInterval;
@@ -28,6 +27,7 @@ class UnitAvaiableHoursService
             $unitId = (string) $request->unit_id;
             $month  = (string) $request->month;
             $day    = (string) $request->day;
+            $serviceId = (int) ($request->service_id ?? 0);
 
             // Adicionamos um zero à esquerda do mês e dia, quando for o caso
             $month = strlen($month) < 2 ? sprintf("%02d", $month) : $month;
@@ -58,17 +58,18 @@ class UnitAvaiableHoursService
 
             // Abertura da grade de horários com valor padrão null
             $divHours = '<div class="hours-grid">';
-
-            // Recuperamos os agendamentos em aberto da unidade
-            $unitSchedules = model(ScheduleModel::class)->getScheduledHoursByDate(unitId: $unit->id, dateWanted: $dateWanted);
-
+            $hasAvailableHour = false;
 
             // Precorro os horários gerados
             foreach($timeRange as $hour){
-            
-                // Se não tiver no 'unitScheduledHours', então fazemos o 'append' em 'divHours'
-                if(! in_array($hour, $unitSchedules)){
+                $chosenDate = $dateWanted . ' ' . $hour;
+                $availableProfessionals = $serviceId > 0
+                    ? (new ProfessionalAvailabilityService())->availableForSlot((int) $unit->id, $serviceId, $chosenDate)
+                    : [];
 
+                if(!empty($availableProfessionals)){
+
+                    $hasAvailableHour = true;
                     $divHours .= form_button(data: ['class' => 'btn btn-hour btn-primary', 'data-hour' => $hour], content: $hour);
                 }
 
@@ -76,6 +77,10 @@ class UnitAvaiableHoursService
             }
 
             $divHours .= '</div>';
+
+            if (!$hasAvailableHour) {
+                return '<div class="alert alert-info">Não há profissionais disponíveis para este serviço neste dia. Cadastre um profissional, associe o serviço e defina o horário de trabalho.</div>';
+            }
 
             // Finalmente retornamos o range de horários
             return $divHours;

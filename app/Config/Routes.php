@@ -5,6 +5,8 @@ use App\Controllers\Super\ServicesController;
 use App\Controllers\Super\SchedulesController;
 use App\Controllers\Super\UnitsController;
 use App\Controllers\Super\UnitsServicesController;
+use App\Controllers\Super\ProfessionalsController;
+use App\Controllers\Super\CommissionsController;
 use App\Controllers\UserSchedulesController;
 use CodeIgniter\Router\RouteCollection;
 use App\Controllers\Super\HomeController;
@@ -12,6 +14,9 @@ use App\Controllers\HomeController as WebController;
 
 /** @var RouteCollection $routes */
 $routes->get('/', [WebController::class, 'index'], ['as' => 'home']);
+
+// Verificação segura do link mágico, evitando conflito com sessões já autenticadas.
+$routes->get('login/verify-magic-link', 'AuthMagicLinkController::verify', ['as' => 'app-verify-magic-link']);
 
 // rotas de autenticaçãp
 service('auth')->routes($routes);
@@ -23,6 +28,9 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
     $routes->get('schedules/new', [SchedulesController::class, 'new'], ['as' => 'super.schedules.new']);
     $routes->post('schedules/create', [SchedulesController::class, 'create'], ['as' => 'super.schedules.create']);
     $routes->delete('schedules/cancel/(:num)', [SchedulesController::class, 'cancel/$1'], ['as' => 'super.schedules.cancel']);
+    $routes->post('schedules/confirm/(:num)', [SchedulesController::class, 'confirm/$1'], ['as' => 'super.schedules.confirm']);
+    $routes->get('commissions', [CommissionsController::class, 'index'], ['as' => 'commissions']);
+    $routes->post('commissions/pay/(:num)', [CommissionsController::class, 'pay/$1'], ['as' => 'commissions.pay']);
 
     // rotas de unidades
     $routes->group('units', static function ($routes) {
@@ -52,6 +60,16 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
         $routes->put('action/(:num)', [ServicesController::class,'action/$1'], ['as' => 'services.action']); // ativa / desativa um registro
         $routes->delete('destroy/(:num)', [ServicesController::class,'destroy/$1'], ['as' => 'services.destroy']);
     });
+
+    $routes->group('professionals', static function ($routes) {
+        $routes->get('/', [ProfessionalsController::class, 'index'], ['as' => 'professionals']);
+        $routes->get('new', [ProfessionalsController::class, 'new'], ['as' => 'professionals.new']);
+        $routes->post('create', [ProfessionalsController::class, 'create'], ['as' => 'professionals.create']);
+        $routes->get('edit/(:num)', [ProfessionalsController::class, 'edit/$1'], ['as' => 'professionals.edit']);
+        $routes->put('update/(:num)', [ProfessionalsController::class, 'update/$1'], ['as' => 'professionals.update']);
+        $routes->put('action/(:num)', [ProfessionalsController::class, 'action/$1'], ['as' => 'professionals.action']);
+        $routes->delete('destroy/(:num)', [ProfessionalsController::class, 'destroy/$1'], ['as' => 'professionals.destroy']);
+    });
 });
 
 // rotas de agendamentos do user logado
@@ -61,6 +79,7 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
         $routes->get('services', [FrontSchedulesController::class,'unitServices'], ['as' => 'get.unit.services']); // recuperamos via fetch API os serviços da unidade
         $routes->get('calendar', [FrontSchedulesController::class,'getCalendar'], ['as' => 'get.calendar']); // recuperamos via fetch API o calendário para o mês desejado
         $routes->get('hours', [FrontSchedulesController::class,'getHours'], ['as' => 'get.hours']); // recuperamos via fetch API os horários disponíveis
+        $routes->get('professionals', [FrontSchedulesController::class,'professionals'], ['as' => 'get.professionals']);
         $routes->post('create', [FrontSchedulesController::class,'createSchedule'], ['as' => 'create.schedule']); // criamos o agendamento via fetch API
         
         $routes->group('my', static function ($routes) {

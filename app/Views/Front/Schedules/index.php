@@ -73,6 +73,24 @@
         padding: 1rem;
     }
 
+    #boxProfessionals {
+        margin-top: 1.25rem;
+    }
+
+    #boxProfessionals .form-select {
+        background-color: rgba(255, 255, 255, .9);
+        border: 1px solid var(--salon-line);
+        border-radius: 6px;
+        color: var(--salon-ink);
+        min-height: 50px;
+        padding: .75rem 1rem;
+    }
+
+    #boxProfessionals .form-select:focus {
+        border-color: var(--salon-rose);
+        box-shadow: 0 0 0 .2rem rgba(184, 92, 91, .16);
+    }
+
     #boxHours .hours-grid {
         display: grid;
         gap: .65rem;
@@ -330,6 +348,11 @@
                             </div>
                         </div>
 
+                        <div id="boxProfessionals" class="col-md-12 form-group d-none">
+                            <p class="lead">Escolha o profissional</p>
+                            <div id="professionals"></div>
+                        </div>
+
 
                     </div>
 
@@ -378,6 +401,7 @@
     const URL_GET_SERVICES = '<?php echo route_to('get.unit.services'); ?>';
     const URL_GET_CALENDAR = '<?php echo route_to('get.calendar'); ?>';
     const URL_GET_HOURS = '<?php echo route_to('get.hours'); ?>';
+    const URL_GET_PROFESSIONALS = '<?php echo route_to('get.professionals'); ?>';
     const URL_CREATION_SCHEDULE = '<?php echo route_to('create.schedule'); ?>';
 
     const boxErrors = document.getElementById('boxErrors');
@@ -388,6 +412,8 @@
     const mainBoxCalendar = document.getElementById('mainBoxCalendar');
     const boxCalendar = document.getElementById('boxCalendar');
     const boxHours = document.getElementById('boxHours');
+    const boxProfessionals = document.getElementById('boxProfessionals');
+    const professionals = document.getElementById('professionals');
     const btnTryCreate = document.getElementById('btnTryCreate');
 
     // preview do que está sendo escolhido
@@ -403,6 +429,7 @@
     let chosenMonth = null;
     let chosenDay = null;
     let chosenHour = null;
+    let professionalId = null;
 
     // CSRF CODE PARA ENVIAR NO REQUEST
     let csrfTokenName = '<?php echo csrf_token(); ?>'
@@ -551,6 +578,11 @@
             return;
         }
 
+        if (!professionalId) {
+            boxErrors.innerHTML = showErrorMessage('Escolha o profissional');
+            return;
+        }
+
         // Desabilitamos o botão
         btnTryCreate.disabled = true;
         btnTryCreate.innerText = 'Estamos criando o seu agendamento...';
@@ -573,7 +605,8 @@
             service_id: parseInt(serviceId),
             month: chosenMonth,
             day: chosenDay,
-            hour: chosenHour
+            hour: chosenHour,
+            professional_id: parseInt(professionalId)
         };
 
         body[csrfTokenName] = csrfTokenValue;
@@ -710,7 +743,8 @@
         let url = URL_GET_HOURS + '?' + setParameters({
             unit_id: unitId,
             month: chosenMonth,
-            day: chosenDay
+            day: chosenDay,
+            service_id: serviceId
         });
 
         const response = await fetch(url, {
@@ -762,6 +796,10 @@
 
                 // Armazenamos na variável global
                 chosenHour = event.target.dataset.hour;
+                professionalId = null;
+                boxProfessionals.classList.remove('d-none');
+                professionals.innerHTML = '<span class="text-info">Carregando profissionais...</span>';
+                getProfessionals();
 
                 // Preview da hora escolhida
                 chosenHourText.innerText = chosenHour;
@@ -769,6 +807,28 @@
         });
 
 
+    };
+
+    const getProfessionals = async () => {
+        const url = URL_GET_PROFESSIONALS + '?' + setParameters({
+            unit_id: unitId,
+            service_id: serviceId,
+            month: chosenMonth,
+            day: chosenDay,
+            hour: chosenHour
+        });
+        const response = await fetch(url, { method: 'get', headers: setHeadersRequest() });
+        if (!response.ok) {
+            professionals.innerHTML = showErrorMessage('Não foi possível recuperar os profissionais disponíveis.');
+            return;
+        }
+        professionals.innerHTML = (await response.json()).professionals;
+        const select = document.getElementById('professional_id');
+        if (select) {
+            select.addEventListener('change', event => {
+                professionalId = event.target.value;
+            });
+        }
     };
 
     // Redefine as opçoes dos meses
@@ -805,6 +865,9 @@
 
         boxCalendar.innerHTML = '';
         boxHours.innerHTML = '';
+        boxProfessionals.classList.add('d-none');
+        professionals.innerHTML = '';
+        professionalId = null;
     }
 
     // Remove a classe do array de elementos
