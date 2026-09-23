@@ -7,7 +7,6 @@ use App\Libraries\UnitServiceService;
 use App\Models\UnitModel;
 use CodeIgniter\Config\Factories;
 use CodeIgniter\HTTP\RedirectResponse;
-use CodeIgniter\View\RendererInterface;
 
 class UnitsServicesController extends BaseController
 {
@@ -29,7 +28,7 @@ class UnitsServicesController extends BaseController
     /**
      * Renderiza a view para gerenciar os serviços da unidade
      * @param int $unitId
-     * @return RendererInterface
+    * @return string
      */
     public function services(int $unitId)
     {

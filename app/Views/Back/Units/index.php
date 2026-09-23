@@ -67,6 +67,7 @@
                             <td>
 
                                 <a href="<?= route_to('units.edit', $unit->id ?? $unit['id']) ?>" class="btn btn-primary btn-sm">Editar</a>
+                                <a href="<?= route_to('units.services', $unit->id ?? $unit['id']) ?>" class="btn btn-success btn-sm">Serviços</a>
                                 <a href="<?= route_to('units.schedules', $unit->id ?? $unit['id']) ?>" class="btn btn-info btn-sm">Agendamentos</a>
 
                                 <?php $unitId = $unit->id ?? $unit['id']; ?>
