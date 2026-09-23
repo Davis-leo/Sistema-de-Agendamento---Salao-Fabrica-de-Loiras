@@ -215,7 +215,7 @@
     <section class="home-hero">
         <div class="home-hero-content">
             <p class="home-eyebrow">Fábrica de Loiras · Márcia Marques</p>
-            <h1>Seu próximo momento começa aqui.</h1>
+            <h1>Seu momento com a gente começa aqui.</h1>
             <p class="home-hero-copy">Cuidado, beleza e tempo para você. Escolha seus serviços e encontre o melhor horário para viver essa experiência.</p>
             <div class="home-hero-actions">
                 <a href="<?php echo route_to('schedules.new'); ?>" class="home-primary-action">Agendar meu horário</a>
