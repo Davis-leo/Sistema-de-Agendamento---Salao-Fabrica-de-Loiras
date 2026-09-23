@@ -190,13 +190,31 @@
         padding-top: 1.75rem;
     }
 
-    #boxServices .form-select {
-        background-color: rgba(255, 255, 255, .9);
-        border: 1px solid var(--salon-line);
-        border-radius: 6px;
-        color: var(--salon-ink);
-        min-height: 50px;
-        padding: .75rem 1rem;
+    #boxServices .services-grid {
+        display: grid;
+        gap: .75rem;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    #boxServices .service-choice {
+        background: #fff;
+        border: 1px solid var(--salon-rose);
+        border-radius: 999px;
+        color: var(--salon-rose);
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 700;
+        min-height: 48px;
+        padding: .7rem 1rem;
+        transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    #boxServices .service-choice:hover,
+    #boxServices .service-choice[aria-pressed="true"] {
+        background: var(--salon-rose);
+        box-shadow: 0 6px 14px rgba(184, 92, 91, .2);
+        color: #fff;
+        transform: translateY(-1px);
     }
 
     #boxServices .form-select:focus {
@@ -376,7 +394,7 @@
         <div class="col-md-2 ms-auto">
 
             <p class="lead mt-4">Unidade escolhida: <br><span id="chosenUnitText" class="text-muted small"></span></p>
-            <p class="lead">Serviço escolhido: <br><span id="chosenServiceText" class="text-muted small"></span></p>
+                    <p class="lead">Serviços escolhidos: <br><span id="chosenServiceText" class="text-muted small"></span></p>
             <p class="lead">Mês escolhido: <br><span id="chosenMonthText" class="text-muted small"></span></p>
             <p class="lead">Dia escolhido: <br><span id="chosenDayText" class="text-muted small"></span></p>
             <p class="lead">Horário escolhido: <br><span id="chosenHourText" class="text-muted small"></span></p>
@@ -425,7 +443,7 @@
 
     // Variáveis de escopo global que utilizaremos na criação do agendamento
     let unitId = null;
-    let serviceId = null;
+    let serviceIds = [];
     let chosenMonth = null;
     let chosenDay = null;
     let chosenHour = null;
@@ -460,6 +478,7 @@
             }
 
             chosenUnitText.innerText = element.getAttribute('data-unit');
+            serviceIds = [];
             chosenServiceText.innerText = '';
             chosenMonthText.innerText = '';
             chosenDayText.innerText = '';
@@ -501,19 +520,25 @@
         // colocamos na div os serviços devolvidos no response
         boxServices.innerHTML = data.services;
 
-        const elementService = document.getElementById('service_id');
-
-        elementService.addEventListener('change', (event) => {
-
-            serviceId = elementService.value ?? null;
-            let serviceName = serviceId !== '' ? elementService.options[event.target.selectedIndex].text : null;
-
-            console.log('Serviço foi escolhido? ', serviceId !== '');
-
-            chosenServiceText.innerText = serviceName;
-
-            serviceId !== '' ? boxMonths.classList.remove('d-none') : boxMonths.classList.add('d-none');
-
+        document.querySelectorAll('.service-choice').forEach(button => {
+            button.addEventListener('click', () => {
+                const id = parseInt(button.dataset.serviceId);
+                const index = serviceIds.indexOf(id);
+                if (index === -1) {
+                    serviceIds.push(id);
+                } else {
+                    serviceIds.splice(index, 1);
+                }
+                button.setAttribute('aria-pressed', serviceIds.includes(id) ? 'true' : 'false');
+                chosenServiceText.innerText = Array.from(document.querySelectorAll('.service-choice[aria-pressed="true"]'))
+                    .map(selected => selected.dataset.serviceName).join(', ');
+                serviceIds.length ? boxMonths.classList.remove('d-none') : boxMonths.classList.add('d-none');
+                chosenDay = null;
+                chosenHour = null;
+                chosenDayText.innerText = '';
+                chosenHourText.innerText = '';
+                resetBoxCalendar();
+            });
         });
 
 
@@ -563,7 +588,7 @@
         }
 
         // Serviço foi escolhido?
-        if (serviceId === null || serviceId === '') {
+        if (!serviceIds.length) {
 
             boxErrors.innerHTML = showErrorMessage('Escolha o serviço');
             return;
@@ -602,7 +627,7 @@
         const body = {
 
             unit_id: parseInt(unitId),
-            service_id: parseInt(serviceId),
+            service_ids: serviceIds,
             month: chosenMonth,
             day: chosenDay,
             hour: chosenHour,
@@ -744,7 +769,7 @@
             unit_id: unitId,
             month: chosenMonth,
             day: chosenDay,
-            service_id: serviceId
+            service_ids: serviceIds.join(',')
         });
 
         const response = await fetch(url, {
@@ -812,7 +837,7 @@
     const getProfessionals = async () => {
         const url = URL_GET_PROFESSIONALS + '?' + setParameters({
             unit_id: unitId,
-            service_id: serviceId,
+            service_ids: serviceIds.join(','),
             month: chosenMonth,
             day: chosenDay,
             hour: chosenHour

@@ -4,6 +4,7 @@ namespace App\Libraries;
 
 use App\Entities\Schedule;
 use App\Models\ScheduleModel;
+use App\Models\ScheduleServiceModel;
 use App\Models\ServiceModel;
 use App\Models\UnitModel;
 use CodeIgniter\Events\Events;
@@ -58,7 +59,7 @@ class ScheduleService
     }
 
     /**
-     * Recupero os serviços associados à unidade informada como um dropdown HTML
+    * Recupera os serviços associados à unidade como opções de seleção múltipla.
      * @param integer $unitId
      * @return string
      */
@@ -75,28 +76,31 @@ class ScheduleService
             throw new InvalidArgumentException("Os serviços associados à Unidade {$unit->name} não estão ativos ou não existem.");
         }
 
-        $options = [];
-        $options [null] = '--- Selecione um serviço ---';
-        
+        $options = '';
 
         foreach ($services as $service) {
-
-            $options[$service->id] = $service->name;
+            $options .= '<button type="button" class="service-choice" data-service-id="' . $service->id . '" data-service-name="' . esc($service->name, 'attr') . '" aria-pressed="false">'
+                . esc($service->name)
+                . '</button>';
         }
 
-        return form_dropdown(data: 'service', options: $options, selected: [], extra: ['id' => 'service_id', 'class' => 'form-select']);
+        return '<div class="services-grid" role="group" aria-label="Serviços disponíveis">' . $options . '</div>';
 
     }
 
-    public function renderProfessionals(int $unitId, int $serviceId, string $chosenDate): string
+    public function renderProfessionals(int $unitId, array $serviceIds, string $chosenDate): string
     {
         $unit = model(UnitModel::class)->where('active', 1)->find($unitId);
-        $service = model(ServiceModel::class)->where('active', 1)->find($serviceId);
-        if (!$unit || !$service || !in_array($serviceId, array_map('intval', $unit->services ?? []), true)) {
+        $serviceIds = array_values(array_unique(array_map('intval', $serviceIds)));
+        if (!$unit) {
+            return '<div class="alert alert-warning">Unidade indisponível.</div>';
+        }
+        $availableServiceIds = array_map('intval', $unit->services ?? []);
+        if (empty($serviceIds) || count(array_diff($serviceIds, $availableServiceIds)) > 0) {
             return '<div class="alert alert-warning">Serviço indisponível para esta unidade.</div>';
         }
 
-        return $this->availabilityService->renderOptions($unitId, $serviceId, $chosenDate);
+        return $this->availabilityService->renderOptions($unitId, $serviceIds, $chosenDate);
     }
 
     /**
@@ -119,19 +123,22 @@ class ScheduleService
             $chosenDate = "{$currentYear}-{$request->month}-{$request->day} {$request->hour}";
 
             $unit = model(UnitModel::class)->where('active', 1)->find($request->unit_id);
-            $service = model(ServiceModel::class)->where('active', 1)->find($request->service_id);
-            if (!$unit || !$service || !in_array((int) $request->service_id, array_map('intval', $unit->services ?? []), true)) {
+            $serviceIds = array_values(array_unique(array_map('intval', (array) ($request->service_ids ?? []))));
+            $activeServices = !empty($serviceIds)
+                ? model(ServiceModel::class)->whereIn('id', $serviceIds)->where('active', 1)->findAll()
+                : [];
+            if (!$unit || empty($serviceIds) || count($activeServices) !== count($serviceIds) || count(array_diff($serviceIds, array_map('intval', $unit->services ?? []))) > 0) {
                 return 'A unidade ou o serviço selecionado não está disponível';
             }
 
-            if (empty($request->professional_id) || !$this->availabilityService->isAvailable((int) $request->unit_id, (int) $request->professional_id, (int) $request->service_id, $chosenDate)) {
+            if (empty($request->professional_id) || !$this->availabilityService->isAvailable((int) $request->unit_id, (int) $request->professional_id, $serviceIds, $chosenDate)) {
 
                 return "O profissional escolhido não está mais disponível nesse horário";
             }
 
             $schedule = new Schedule([
                 'unit_id'     => $request->unit_id,
-                'service_id'  => $request->service_id,
+                'service_id'  => $serviceIds[0],
                 'professional_id' => $request->professional_id,
                 'chosen_date' => $chosenDate,
             ]);
@@ -142,6 +149,14 @@ class ScheduleService
                 log_message('error', 'Erro ao criar agendamento: ', $model->errors());
 
                 return "Não foi possível criar o agendamento";
+            }
+
+            $scheduleServiceModel = model(ScheduleServiceModel::class);
+            foreach ($serviceIds as $serviceId) {
+                $scheduleServiceModel->insert([
+                    'schedule_id' => $createdId,
+                    'service_id'  => $serviceId,
+                ]);
             }
 
             /**

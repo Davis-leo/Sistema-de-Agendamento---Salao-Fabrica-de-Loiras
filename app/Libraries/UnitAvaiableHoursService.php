@@ -27,7 +27,12 @@ class UnitAvaiableHoursService
             $unitId = (string) $request->unit_id;
             $month  = (string) $request->month;
             $day    = (string) $request->day;
-            $serviceId = (int) ($request->service_id ?? 0);
+            $rawServiceIds = (array) ($request->service_ids ?? []);
+            $serviceIds = [];
+            foreach ($rawServiceIds as $rawServiceId) {
+                $serviceIds = array_merge($serviceIds, explode(',', (string) $rawServiceId));
+            }
+            $serviceIds = array_values(array_unique(array_filter(array_map('intval', $serviceIds))));
 
             // Adicionamos um zero à esquerda do mês e dia, quando for o caso
             $month = strlen($month) < 2 ? sprintf("%02d", $month) : $month;
@@ -63,8 +68,8 @@ class UnitAvaiableHoursService
             // Precorro os horários gerados
             foreach($timeRange as $hour){
                 $chosenDate = $dateWanted . ' ' . $hour;
-                $availableProfessionals = $serviceId > 0
-                    ? (new ProfessionalAvailabilityService())->availableForSlot((int) $unit->id, $serviceId, $chosenDate)
+                $availableProfessionals = !empty($serviceIds)
+                    ? (new ProfessionalAvailabilityService())->availableForSlot((int) $unit->id, $serviceIds, $chosenDate)
                     : [];
 
                 if(!empty($availableProfessionals)){

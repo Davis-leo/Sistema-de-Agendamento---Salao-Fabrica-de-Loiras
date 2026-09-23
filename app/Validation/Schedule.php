@@ -17,12 +17,11 @@ class Schedule
                 ],
             ],
 
-            'service_id' => [
+            'service_ids' => [
 
-                'rules'  => 'is_natural_no_zero|is_not_unique[services.id]',
+                'rules'  => 'required',
                 'errors' => [
-                    'is_natural_no_zero' => 'Dado errado',
-                    'is_not_unique'      => 'Serviço inválido', 
+                    'required' => 'Escolha pelo menos um serviço',
                 ],
             ],
 

@@ -121,10 +121,12 @@ class SchedulesController extends BaseController
         try {
             $this->checkMethod('ajax');
             $date = sprintf('%s-%02d-%02d %s', date('Y'), (int) $this->request->getGet('month'), (int) $this->request->getGet('day'), $this->request->getGet('hour'));
+            $serviceIds = array_filter(explode(',', (string) $this->request->getGet('service_ids')));
+
             return $this->response->setJSON([
                 'professionals' => $this->scheduleService->renderProfessionals(
                     (int) $this->request->getGet('unit_id'),
-                    (int) $this->request->getGet('service_id'),
+                    $serviceIds,
                     $date
                 ),
             ]);

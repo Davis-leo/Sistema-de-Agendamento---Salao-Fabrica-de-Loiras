@@ -13,10 +13,11 @@ class ProfessionalAvailabilityService
 {
     public const MAX_SIMULTANEOUS_SCHEDULES = 3;
 
-    public function availableForSlot(int $unitId, int $serviceId, string $chosenDate): array
+    public function availableForSlot(int $unitId, array $serviceIds, string $chosenDate): array
     {
         $unit = model(UnitModel::class)->where('active', 1)->find($unitId);
-        if (!$unit || !in_array($serviceId, array_map('intval', $unit->services ?? []), true)) {
+        $serviceIds = array_values(array_unique(array_map('intval', $serviceIds)));
+        if (!$unit || empty($serviceIds) || count(array_diff($serviceIds, array_map('intval', $unit->services ?? []))) > 0) {
             return [];
         }
 
@@ -39,10 +40,11 @@ class ProfessionalAvailabilityService
         $available = [];
 
         foreach ($professionals as $professional) {
-            $hasService = $serviceModel
-                ->where(['professional_id' => $professional->id, 'service_id' => $serviceId])
-                ->first();
-            if (!$hasService) {
+            $professionalServices = $serviceModel
+                ->where('professional_id', $professional->id)
+                ->whereIn('service_id', $serviceIds)
+                ->findAll();
+            if (count($professionalServices) !== count($serviceIds)) {
                 continue;
             }
 
@@ -67,10 +69,10 @@ class ProfessionalAvailabilityService
         return $available;
     }
 
-    public function renderOptions(int $unitId, int $serviceId, string $chosenDate): string
+    public function renderOptions(int $unitId, array $serviceIds, string $chosenDate): string
     {
         $options = [null => '--- Selecione um profissional ---'];
-        foreach ($this->availableForSlot($unitId, $serviceId, $chosenDate) as $professional) {
+        foreach ($this->availableForSlot($unitId, $serviceIds, $chosenDate) as $professional) {
             $options[$professional->id] = $professional->name;
         }
 
@@ -84,8 +86,9 @@ class ProfessionalAvailabilityService
         ]);
     }
 
-    public function isAvailable(int $unitId, int $professionalId, int $serviceId, string $chosenDate): bool
+    public function isAvailable(int $unitId, int $professionalId, array $serviceIds, string $chosenDate): bool
     {
+        $serviceIds = array_values(array_unique(array_map('intval', $serviceIds)));
         foreach (model(ProfessionalModel::class)->where('active', 1)->findAll() as $professional) {
             $date = DateTime::createFromFormat('Y-m-d H:i', $chosenDate);
             if (!$date || (int) $professional->id !== $professionalId || (int) $professional->unit_id !== $unitId) {
@@ -97,14 +100,15 @@ class ProfessionalAvailabilityService
                 ->where('start_time <=', $date->format('H:i:s'))
                 ->where('end_time >', $date->format('H:i:s'))
                 ->first();
-            $hasService = model(ProfessionalServiceModel::class)
-                ->where(['professional_id' => $professionalId, 'service_id' => $serviceId])
-                ->first();
+            $professionalServices = model(ProfessionalServiceModel::class)
+                ->where('professional_id', $professionalId)
+                ->whereIn('service_id', $serviceIds)
+                ->findAll();
             $count = model(ScheduleModel::class)
                 ->where(['professional_id' => $professionalId, 'canceled' => 0, 'finished' => 0])
                 ->where('chosen_date', $chosenDate . ':00')
                 ->countAllResults();
-            if ($workingHour && $hasService && $count < self::MAX_SIMULTANEOUS_SCHEDULES) {
+            if ($workingHour && count($professionalServices) === count($serviceIds) && $count < self::MAX_SIMULTANEOUS_SCHEDULES) {
                 return true;
             }
         }
