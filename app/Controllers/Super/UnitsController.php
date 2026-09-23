@@ -110,9 +110,9 @@ class UnitsController extends BaseController
 
         $entity = new \App\Entities\Unit($data);
 
-        if (!$this->unitService->create($entity)) {
+        if (!$this->unitModel->insert($entity)) {
 
-            return redirect()->back()->withInput()->with("errors", $this->unitService->errors());
+            return redirect()->back()->withInput()->with("errors", $this->unitModel->errors());
 
         }
 
@@ -162,9 +162,9 @@ class UnitsController extends BaseController
 
         $unit->fill($this->request->getPost());
 
-        if (!$this->unitService->update($unit)) {
+        if (!$this->unitModel->save($unit)) {
 
-            return redirect()->back()->withInput()->with("errors", $this->unitService->errors());
+            return redirect()->back()->withInput()->with("errors", $this->unitModel->errors());
 
         }
 
@@ -178,9 +178,9 @@ class UnitsController extends BaseController
 
     {
 
-        if (!$this->unitService->delete($id)) {
+        if (!$this->unitModel->delete($id)) {
 
-            return redirect()->to(route_to("super.units"))->with("danger", $this->unitService->errors());
+            return redirect()->to(route_to("super.units"))->with("danger", $this->unitModel->errors());
 
         }
 
