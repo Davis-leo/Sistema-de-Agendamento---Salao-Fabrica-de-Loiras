@@ -116,7 +116,8 @@ class UnitsController extends BaseController
 
         }
 
-        return redirect()->to(route_to("super.units"))->with("success", "Unidade criada");
+        return redirect()->to(route_to("units.services", $this->unitModel->getInsertID()))
+            ->with("success", "Unidade criada. Agora associe os serviços disponíveis.");
 
     }
 
@@ -161,6 +162,11 @@ class UnitsController extends BaseController
         }
 
         $unit->fill($this->request->getPost());
+
+        if (!$unit->hasChanged()) {
+
+            return redirect()->back()->with('info', 'Não há dados para atualizar.');
+        }
 
         if (!$this->unitModel->save($unit)) {
 
