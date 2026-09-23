@@ -15,6 +15,36 @@
         margin-bottom: 1.5rem;
         padding: 1rem 1.15rem;
     }
+
+    .admin-services {
+        display: grid;
+        gap: .65rem;
+        grid-auto-rows: 44px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-service-option {
+        align-items: center;
+        background: #fffdfb;
+        border: 1px solid rgba(145, 70, 70, .35);
+        border-radius: 999px;
+        cursor: pointer;
+        display: flex;
+        gap: .6rem;
+        height: 44px;
+        min-height: 44px;
+        padding: .65rem .85rem;
+        width: 100%;
+        transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .admin-service-option:has(input:checked) {
+        background: var(--salon-rose);
+        border-color: var(--salon-rose);
+        color: #fff;
+    }
+
+    .admin-service-option input { accent-color: var(--salon-rose); }
 </style>
 <?php echo $this->endSection(); ?>
 
@@ -70,16 +100,17 @@
                     <?php echo show_error_input('professional_id'); ?>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="service_id">Serviço</label>
-                    <select class="form-control" name="service_id" id="service_id" required>
-                        <option value="">Selecione um serviço</option>
+                    <label>Serviços</label>
+                    <div class="admin-services">
+                        <?php $oldServiceIds = array_map('intval', (array) old('service_ids')); ?>
                         <?php foreach ($services as $service): ?>
-                            <option value="<?php echo $service->id; ?>" <?php echo old('service_id') == $service->id ? 'selected' : ''; ?>>
-                                <?php echo esc($service->name); ?>
-                            </option>
+                            <label class="admin-service-option">
+                                <input type="checkbox" name="service_ids[]" value="<?php echo $service->id; ?>" <?php echo in_array((int) $service->id, $oldServiceIds, true) ? 'checked' : ''; ?>>
+                                <span><?php echo esc($service->name); ?></span>
+                            </label>
                         <?php endforeach; ?>
-                    </select>
-                    <?php echo show_error_input('service_id'); ?>
+                    </div>
+                    <?php echo show_error_input('service_ids'); ?>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="chosen_date">Data e horário</label>

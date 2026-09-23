@@ -192,8 +192,9 @@
 
     #boxServices .services-grid {
         display: grid;
-        gap: .75rem;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: .6rem;
+        grid-auto-rows: 40px;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     }
 
     #boxServices .service-choice {
@@ -204,8 +205,11 @@
         cursor: pointer;
         font-family: 'DM Sans', sans-serif;
         font-weight: 700;
-        min-height: 48px;
-        padding: .7rem 1rem;
+        font-size: .88rem;
+        height: 40px;
+        min-height: 40px;
+        padding: .5rem .8rem;
+        width: 100%;
         transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
     }
 
@@ -220,6 +224,37 @@
     #boxServices .form-select:focus {
         border-color: var(--salon-rose);
         box-shadow: 0 0 0 .2rem rgba(184, 92, 91, .16);
+    }
+
+    #professionals .professionals-grid {
+        display: grid;
+        gap: .6rem;
+        grid-auto-rows: 40px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #professionals .professional-choice {
+        background: #fff;
+        border: 1px solid var(--salon-rose);
+        border-radius: 999px;
+        color: var(--salon-rose);
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        font-size: .88rem;
+        font-weight: 700;
+        height: 40px;
+        min-height: 40px;
+        padding: .5rem .8rem;
+        width: 100%;
+        transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    #professionals .professional-choice:hover,
+    #professionals .professional-choice[aria-pressed="true"] {
+        background: var(--salon-rose);
+        box-shadow: 0 6px 14px rgba(184, 92, 91, .2);
+        color: #fff;
+        transform: translateY(-1px);
     }
 
     main>.container:has(#mainBoxServices) .col-md-2 .lead {
@@ -848,12 +883,15 @@
             return;
         }
         professionals.innerHTML = (await response.json()).professionals;
-        const select = document.getElementById('professional_id');
-        if (select) {
-            select.addEventListener('change', event => {
-                professionalId = event.target.value;
+        document.querySelectorAll('.professional-choice').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.professional-choice').forEach(option => {
+                    option.setAttribute('aria-pressed', 'false');
+                });
+                button.setAttribute('aria-pressed', 'true');
+                professionalId = button.dataset.professionalId;
             });
-        }
+        });
     };
 
     // Redefine as opçoes dos meses

@@ -20,7 +20,7 @@ class HomeController extends BaseController
                 'schedules.*',
                 'DATE_FORMAT(schedules.chosen_date, "%d/%m/%Y às %H:%i") AS formated_chosen_date',
                 'units.name AS unit',
-                'services.name AS service',
+                'COALESCE((SELECT GROUP_CONCAT(selected_services.name ORDER BY selected_services.name SEPARATOR ", ") FROM schedule_services JOIN services AS selected_services ON selected_services.id = schedule_services.service_id WHERE schedule_services.schedule_id = schedules.id), services.name) AS service',
                 'professionals.name AS professional',
                 'COALESCE(users.username, schedules.customer_name) AS user',
             ])

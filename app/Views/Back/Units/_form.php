@@ -98,4 +98,4 @@
 
 <button type="submit" class="btn btn-primary mt-4">Salvar</button>
 
-<a href="<?php echo route_to('super.units') ?>" class="btn btn-secondary mt-4">Voltar</a>
+<a href="<?php echo route_to('units') ?>" class="btn btn-secondary mt-4">Voltar</a>

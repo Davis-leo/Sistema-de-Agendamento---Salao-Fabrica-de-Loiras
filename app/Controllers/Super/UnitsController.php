@@ -7,6 +7,7 @@ use App\Controllers\BaseController;
 use App\Libraries\UnitService;
 
 use App\Models\UnitModel;
+use CodeIgniter\HTTP\RedirectResponse;
 
 
 
@@ -106,13 +107,16 @@ class UnitsController extends BaseController
 
     {
 
-        $data = $this->request->getPost();
+        $data = $this->clearRequest();
 
         $entity = new \App\Entities\Unit($data);
 
         if (!$this->unitModel->insert($entity)) {
 
-            return redirect()->back()->withInput()->with("errors", $this->unitModel->errors());
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', 'Verifique os dados da unidade e tente novamente.')
+                ->with('errorsValidation', $this->unitModel->errors());
 
         }
 
@@ -131,7 +135,7 @@ class UnitsController extends BaseController
 
         if (!$unit) {
 
-            return redirect()->to(route_to("super.units"))->with("danger", "Nao encontrada");
+            return redirect()->to(route_to("units"))->with("danger", "Nao encontrada");
 
         }
 
@@ -157,11 +161,11 @@ class UnitsController extends BaseController
 
         if (!$unit) {
 
-            return redirect()->to(route_to("super.units"))->with("danger", "Nao encontrada");
+            return redirect()->to(route_to("units"))->with("danger", "Nao encontrada");
 
         }
 
-        $unit->fill($this->request->getPost());
+        $unit->fill($this->clearRequest());
 
         if (!$unit->hasChanged()) {
 
@@ -170,27 +174,52 @@ class UnitsController extends BaseController
 
         if (!$this->unitModel->save($unit)) {
 
-            return redirect()->back()->withInput()->with("errors", $this->unitModel->errors());
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', 'Verifique os dados da unidade e tente novamente.')
+                ->with('errorsValidation', $this->unitModel->errors());
 
         }
 
-        return redirect()->to(route_to("super.units"))->with("success", "Atualizada");
+        return redirect()->to(route_to("units"))->with("success", "Atualizada");
 
     }
 
 
 
-    public function delete(int $id)
+    public function action(int $id): RedirectResponse
+    {
+        $this->checkMethod('put');
+
+        $unit = $this->unitModel->findOrFail($id);
+        $unit->setAction();
+        $this->unitModel->save($unit);
+
+        return redirect()->to(route_to('units'))->with('success', 'Status atualizado com sucesso.');
+    }
+
+    public function destroy(int $id): RedirectResponse
 
     {
 
         if (!$this->unitModel->delete($id)) {
 
-            return redirect()->to(route_to("super.units"))->with("danger", $this->unitModel->errors());
+            return redirect()->to(route_to("units"))->with("danger", $this->unitModel->errors());
 
         }
 
-        return redirect()->to(route_to("super.units"))->with("success", "Removida");
+        return redirect()->to(route_to("units"))->with("success", "Removida");
+    }
+
+    public function schedules(int $id): string
+    {
+        $unit = $this->unitModel->findOrFail($id);
+
+        return view('Back/Units/schedules', [
+            'title' => 'Agendamentos da Unidade',
+            'schedules' => $this->unitService->renderUnitSchedules($id),
+            'unit' => $unit,
+        ]);
 
     }
 

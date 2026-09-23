@@ -8,6 +8,7 @@ use App\Models\ScheduleModel;
 use App\Models\ServiceModel;
 use App\Models\UnitModel;
 use App\Models\ProfessionalModel;
+use App\Models\ScheduleServiceModel;
 use App\Libraries\ProfessionalAvailabilityService;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -35,7 +36,7 @@ class SchedulesController extends BaseController
             'customer_phone',
             'customer_email',
             'unit_id',
-            'service_id',
+            'service_ids',
             'professional_id',
             'chosen_date',
         ]);
@@ -45,25 +46,28 @@ class SchedulesController extends BaseController
             'customer_phone' => 'required|exact_length[15]',
             'customer_email' => 'permit_empty|valid_email|max_length[120]',
             'unit_id'        => 'required|is_natural_no_zero',
-            'service_id'     => 'required|is_natural_no_zero',
+            'service_ids'    => 'required',
             'professional_id'=> 'required|is_natural_no_zero',
             'chosen_date'    => 'required',
         ];
 
-        if (!$this->validateData($request, $rules)) {
+        $serviceIds = array_values(array_unique(array_filter(array_map('intval', (array) ($request['service_ids'] ?? [])))));
+        $request['service_ids'] = $serviceIds;
+
+        if (empty($serviceIds) || !$this->validateData($request, $rules)) {
             return redirect()->back()->withInput()->with('danger', 'Verifique os dados do agendamento.')->with('errorsValidation', $this->validator->getErrors());
         }
 
         $unit = model(UnitModel::class)->where('active', 1)->find($request['unit_id']);
-        $service = model(ServiceModel::class)->where('active', 1)->find($request['service_id']);
+        $services = model(ServiceModel::class)->whereIn('id', $serviceIds)->where('active', 1)->findAll();
 
-        if (!$unit || !$service) {
+        if (!$unit || count($services) !== count($serviceIds)) {
             return redirect()->back()->withInput()->with('danger', 'A unidade ou o serviço selecionado não está disponível.');
         }
 
         $unitServices = array_map('intval', $unit->services ?? []);
-        if (!in_array((int) $service->id, $unitServices, true)) {
-            return redirect()->back()->withInput()->with('danger', 'O serviço selecionado não está associado à unidade.');
+        if (count(array_diff($serviceIds, $unitServices)) > 0) {
+            return redirect()->back()->withInput()->with('danger', 'Um ou mais serviços não estão associados à unidade.');
         }
 
         $chosenDate = str_replace('T', ' ', $request['chosen_date']);
@@ -74,14 +78,14 @@ class SchedulesController extends BaseController
         }
 
         $professional = model(ProfessionalModel::class)->where('active', 1)->find($request['professional_id']);
-        if (!$professional || !(new ProfessionalAvailabilityService())->isAvailable((int) $unit->id, (int) $professional->id, (int) $service->id, $chosenDate)) {
+        if (!$professional || !(new ProfessionalAvailabilityService())->isAvailable((int) $unit->id, (int) $professional->id, $serviceIds, $chosenDate)) {
             return redirect()->back()->withInput()->with('danger', 'O profissional não está disponível nesse horário.');
         }
 
         $scheduleModel = model(ScheduleModel::class);
         $schedule = new Schedule([
             'unit_id'       => $unit->id,
-            'service_id'    => $service->id,
+            'service_id'    => $serviceIds[0],
             'professional_id'=> $professional->id,
             'user_id'       => null,
             'customer_name' => $request['customer_name'],
@@ -93,6 +97,14 @@ class SchedulesController extends BaseController
 
         if (!$scheduleModel->insert($schedule)) {
             return redirect()->back()->withInput()->with('danger', 'Não foi possível criar o agendamento.');
+        }
+
+        $scheduleServiceModel = model(ScheduleServiceModel::class);
+        foreach ($serviceIds as $serviceId) {
+            $scheduleServiceModel->insert([
+                'schedule_id' => $scheduleModel->getInsertID(),
+                'service_id'  => $serviceId,
+            ]);
         }
 
         if ($request['customer_email']) {

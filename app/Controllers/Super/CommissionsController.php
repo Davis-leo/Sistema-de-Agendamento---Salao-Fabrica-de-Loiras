@@ -13,7 +13,28 @@ class CommissionsController extends BaseController
     {
         $weekStart = date('Y-m-d', strtotime('monday this week'));
         $weekEnd = date('Y-m-d', strtotime('sunday this week'));
-        $rows = model(ScheduleModel::class)
+        $scheduleModel = model(ScheduleModel::class);
+        $pendingSchedules = $scheduleModel
+            ->select([
+                'schedules.id',
+                'schedules.chosen_date',
+                'schedules.customer_name',
+                'schedules.customer_phone',
+                'units.name AS unit',
+                'COALESCE((SELECT GROUP_CONCAT(selected_services.name ORDER BY selected_services.name SEPARATOR ", ") FROM schedule_services JOIN services AS selected_services ON selected_services.id = schedule_services.service_id WHERE schedule_services.schedule_id = schedules.id), services.name) AS service',
+                'professionals.name AS professional',
+            ])
+            ->join('units', 'units.id = schedules.unit_id')
+            ->join('services', 'services.id = schedules.service_id')
+            ->join('professionals', 'professionals.id = schedules.professional_id', 'left')
+            ->where('schedules.confirmed', 0)
+            ->where('schedules.canceled', 0)
+            ->where('DATE(schedules.chosen_date) >=', $weekStart)
+            ->where('DATE(schedules.chosen_date) <=', $weekEnd)
+            ->orderBy('schedules.chosen_date', 'ASC')
+            ->findAll();
+
+        $rows = $scheduleModel
             ->select('professionals.id AS professional_id, professionals.name AS professional, COUNT(schedules.id) AS appointments, SUM(schedules.commission_amount) AS total')
             ->join('professionals', 'professionals.id = schedules.professional_id')
             ->where('schedules.confirmed', 1)
@@ -30,7 +51,7 @@ class CommissionsController extends BaseController
         foreach ($settlements as $settlement) {
             $paid[$settlement['professional_id']] = $settlement;
         }
-        return view('Back/Commissions/index', compact('rows', 'paid', 'weekStart', 'weekEnd'));
+        return view('Back/Commissions/index', compact('rows', 'paid', 'pendingSchedules', 'weekStart', 'weekEnd'));
     }
 
     public function pay(int $professionalId): RedirectResponse

@@ -67,8 +67,12 @@
                             <td>
 
                                 <a href="<?= route_to('units.edit', $unit->id ?? $unit['id']) ?>" class="btn btn-primary btn-sm">Editar</a>
+                                <a href="<?= route_to('units.schedules', $unit->id ?? $unit['id']) ?>" class="btn btn-info btn-sm">Agendamentos</a>
 
-                                <a href="<?= route_to('units.delete', $unit->id ?? $unit['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Remover?')">Excluir</a>
+                                <?php $unitId = $unit->id ?? $unit['id']; ?>
+                                <?php echo form_open(route_to('units.destroy', $unitId), ['class' => 'd-inline', 'onsubmit' => "return confirm('Remover?')"], ['_method' => 'DELETE']); ?>
+                                <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                <?php echo form_close(); ?>
 
                             </td>
 

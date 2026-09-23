@@ -71,19 +71,18 @@ class ProfessionalAvailabilityService
 
     public function renderOptions(int $unitId, array $serviceIds, string $chosenDate): string
     {
-        $options = [null => '--- Selecione um profissional ---'];
+        $options = '';
         foreach ($this->availableForSlot($unitId, $serviceIds, $chosenDate) as $professional) {
-            $options[$professional->id] = $professional->name;
+            $options .= '<button type="button" class="professional-choice" data-professional-id="' . $professional->id . '" aria-pressed="false">'
+                . esc($professional->name)
+                . '</button>';
         }
 
-        if (count($options) === 1) {
+        if ($options === '') {
             return '<div class="alert alert-warning">Não há profissionais disponíveis para este horário.</div>';
         }
 
-        return form_dropdown('professional_id', $options, old('professional_id'), [
-            'id' => 'professional_id',
-            'class' => 'form-select',
-        ]);
+        return '<div class="professionals-grid" role="group" aria-label="Profissionais disponíveis">' . $options . '</div>';
     }
 
     public function isAvailable(int $unitId, int $professionalId, array $serviceIds, string $chosenDate): bool

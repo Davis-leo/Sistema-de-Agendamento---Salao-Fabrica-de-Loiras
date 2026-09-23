@@ -27,26 +27,26 @@ $routes->group('super', ['filter' => 'group:superadmin'] ,static function ($rout
     $routes->get('/', [HomeController::class,'index'], ['as' => 'super.home']);
     $routes->get('schedules/new', [SchedulesController::class, 'new'], ['as' => 'super.schedules.new']);
     $routes->post('schedules/create', [SchedulesController::class, 'create'], ['as' => 'super.schedules.create']);
-    $routes->delete('schedules/cancel/(:num)', [SchedulesController::class, 'cancel/$1'], ['as' => 'super.schedules.cancel']);
-    $routes->post('schedules/confirm/(:num)', [SchedulesController::class, 'confirm/$1'], ['as' => 'super.schedules.confirm']);
+    $routes->delete('schedules/cancel/(:num)', [SchedulesController::class, 'cancel'], ['as' => 'super.schedules.cancel']);
+    $routes->post('schedules/confirm/(:num)', [SchedulesController::class, 'confirm'], ['as' => 'super.schedules.confirm']);
     $routes->get('commissions', [CommissionsController::class, 'index'], ['as' => 'commissions']);
-    $routes->post('commissions/pay/(:num)', [CommissionsController::class, 'pay/$1'], ['as' => 'commissions.pay']);
+    $routes->post('commissions/pay/(:num)', [CommissionsController::class, 'pay'], ['as' => 'commissions.pay']);
 
     // rotas de unidades
     $routes->group('units', static function ($routes) {
 
         $routes->get('/', [UnitsController::class,'index'], ['as' => 'units']);
-        $routes->get('new', [UnitsController::class,'new/$1'], ['as' => 'units.new']);
-        $routes->get('edit/(:num)', [UnitsController::class,'edit/$1'], ['as' => 'units.edit']);
+        $routes->get('new', [UnitsController::class,'new'], ['as' => 'units.new']);
+        $routes->get('edit/(:num)', [UnitsController::class,'edit'], ['as' => 'units.edit']);
         $routes->post('create', [UnitsController::class,'create'], ['as' => 'units.create']);
-        $routes->put('update/(:num)', [UnitsController::class,'update/$1'], ['as' => 'units.update']);
-        $routes->put('action/(:num)', [UnitsController::class,'action/$1'], ['as' => 'units.action']); // ativa / desativa um registro
-        $routes->delete('destroy/(:num)', [UnitsController::class,'destroy/$1'], ['as' => 'units.destroy']);
-        $routes->get('schedules/(:num)', [UnitsController::class,'schedules/$1'], ['as' => 'units.schedules']);
+        $routes->put('update/(:num)', [UnitsController::class,'update'], ['as' => 'units.update']);
+        $routes->put('action/(:num)', [UnitsController::class,'action'], ['as' => 'units.action']); // ativa / desativa um registro
+        $routes->delete('destroy/(:num)', [UnitsController::class,'destroy'], ['as' => 'units.destroy']);
+        $routes->get('schedules/(:num)', [UnitsController::class,'schedules'], ['as' => 'units.schedules']);
 
         // Rotas dos serviços da unidade
-        $routes->get('services/(:num)', [UnitsServicesController::class,'services/$1'], ['as' => 'units.services']);
-        $routes->put('services/store/(:num)', [UnitsServicesController::class,'store/$1'], ['as' => 'units.services.store']);
+        $routes->get('services/(:num)', [UnitsServicesController::class,'services'], ['as' => 'units.services']);
+        $routes->put('services/store/(:num)', [UnitsServicesController::class,'store'], ['as' => 'units.services.store']);
     });
 
     // rotas de serviços

@@ -27,12 +27,8 @@ class ScheduleService
     public function renderUnits(): string
     {
 
-        // unidades ativas e com serviços associados
-        $where = [
-            'active' => 1,
-            'services !=' => null,
-            'services !=' => '',
-        ];
+        // Unidades ativas. A associação de serviços é validada no passo seguinte.
+        $where = ['active' => 1];
 
         $units = model(UnitModel::class)->where($where)->orderBy('name', 'ASC')->findAll();
 
@@ -65,8 +61,12 @@ class ScheduleService
      */
     public function renderUnitServices(int $unitId): string
     {
-        // Validamos a existência da unidade, ativa, com serviços
-        $unit = model(UnitModel::class)->where(['active' => 1, 'services!=' => null, 'services !=' => ''])->findOrfail($unitId);
+        // Validamos a existência da unidade ativa.
+        $unit = model(UnitModel::class)->where('active', 1)->findOrfail($unitId);
+
+        if (empty($unit->services)) {
+            return '<div class="alert alert-warning">Esta unidade ainda não possui serviços associados.</div>';
+        }
 
         // buscamos os serviços dessa unidade
         $services = model(ServiceModel::class)->whereIn('id', $unit->services)->where('active', 1)->orderBy('name', 'ASC')->findAll();
