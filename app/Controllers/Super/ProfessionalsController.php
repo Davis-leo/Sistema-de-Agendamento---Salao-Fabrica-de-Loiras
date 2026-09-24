@@ -9,11 +9,11 @@ use App\Models\ProfessionalServiceModel;
 use App\Models\ProfessionalWorkingHourModel;
 use App\Models\ServiceModel;
 use App\Models\UnitModel;
+use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\HTTP\RedirectResponse;
 
 class ProfessionalsController extends BaseController
 {
-    private array $commissionOptions = [30, 40, 50, 60, 70, 80, 90, 100];
     private array $weekdays = [
         0 => 'Segunda-feira', 1 => 'Terça-feira', 2 => 'Quarta-feira',
         3 => 'Quinta-feira', 4 => 'Sexta-feira', 5 => 'Sábado', 6 => 'Domingo',
@@ -58,7 +58,13 @@ class ProfessionalsController extends BaseController
         $model = model(ProfessionalModel::class);
         $professional = $model->findorFail($id);
         $professional->fill($this->clearRequest());
-        if (!$model->save($professional)) {
+        try {
+            $saved = $model->save($professional);
+        } catch (DataException $exception) {
+            $this->saveRelations($id);
+            return redirect()->route('professionals')->with('info', 'Nenhum dado principal foi alterado.');
+        }
+        if (!$saved) {
             return redirect()->back()->withInput()->with('danger', 'Verifique os dados do profissional.')->with('errorsValidation', $model->errors());
         }
         $this->saveRelations($id);
@@ -98,7 +104,6 @@ class ProfessionalsController extends BaseController
             'serviceIds' => array_map('intval', $serviceIds),
             'hours' => $hours,
             'weekdays' => $this->weekdays,
-            'commissionOptions' => $this->commissionOptions,
         ];
     }
 

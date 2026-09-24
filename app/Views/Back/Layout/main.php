@@ -256,6 +256,12 @@
                     <span>Comissões</span></a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo route_to('reports'); ?>">
+                    <i class="fas fa-fw fa-file-pdf"></i>
+                    <span>Relatórios</span></a>
+            </li>
+
             <!-- Item de navegação - Novo agendamento -->
             <li class="nav-item">
                 <a class="nav-link" href="<?php echo route_to('super.schedules.new'); ?>">

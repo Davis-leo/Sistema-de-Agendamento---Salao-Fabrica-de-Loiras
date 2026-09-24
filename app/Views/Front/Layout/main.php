@@ -288,7 +288,12 @@
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo route_to('schedules.my'); ?>">Meus Agendamentos</a>
                         </li>
-                        <?php if (auth()->loggedIn() && auth()->user()->inGroup('superadmin')): ?>
+                        <?php if (auth()->loggedIn()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo route_to('profile'); ?>">Meus Dados</a>
+                        </li>
+                        <?php endif; ?>
+                        <?php if (auth()->loggedIn() && auth()->user()->inGroup('admin', 'superadmin')): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo route_to('super.home'); ?>">Administração</a>
                         </li>

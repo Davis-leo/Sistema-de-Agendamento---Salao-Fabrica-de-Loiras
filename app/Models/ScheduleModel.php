@@ -113,6 +113,7 @@ class ScheduleModel extends MyBaseModel
             'units.name AS unit',
             'units.address',
             'COALESCE((SELECT GROUP_CONCAT(selected_services.name ORDER BY selected_services.name SEPARATOR ", ") FROM schedule_services JOIN services AS selected_services ON selected_services.id = schedule_services.service_id WHERE schedule_services.schedule_id = schedules.id), services.name) AS service',
+            'COALESCE((SELECT GROUP_CONCAT(DISTINCT CONCAT(COALESCE(assigned_professionals.name, professionals.name), " (", (SELECT GROUP_CONCAT(DISTINCT grouped_services.name ORDER BY grouped_services.name SEPARATOR ", ") FROM schedule_services AS grouped_assignments JOIN services AS grouped_services ON grouped_services.id = grouped_assignments.service_id WHERE grouped_assignments.schedule_id = schedules.id AND COALESCE(grouped_assignments.professional_id, schedules.professional_id) = COALESCE(schedule_services.professional_id, schedules.professional_id)), ")") ORDER BY COALESCE(assigned_professionals.name, professionals.name) SEPARATOR " - ") FROM schedule_services LEFT JOIN professionals AS assigned_professionals ON assigned_professionals.id = schedule_services.professional_id WHERE schedule_services.schedule_id = schedules.id), CONCAT(services.name, " - ", COALESCE(professionals.name, "Profissional não definido"))) AS service_professionals',
             'professionals.name AS professional',
         ]);
 
@@ -171,7 +172,8 @@ class ScheduleModel extends MyBaseModel
         $this->join('services', 'services.id = schedules.service_id');
         $this->join('professionals', 'professionals.id = schedules.professional_id', 'left');
         $this->where('schedules.user_id', auth()->user()->id); // do user logado
-        $this->orderBy('schedules.id', 'DESC');
+        $this->orderBy('schedules.chosen_date', 'ASC');
+        $this->orderBy('schedules.id', 'ASC');
 
         return $this->findAll();
     }
@@ -192,7 +194,7 @@ class ScheduleModel extends MyBaseModel
             'COALESCE((SELECT GROUP_CONCAT(selected_services.name ORDER BY selected_services.name SEPARATOR ", ") FROM schedule_services JOIN services AS selected_services ON selected_services.id = schedule_services.service_id WHERE schedule_services.schedule_id = schedules.id), services.name) AS service',
             'professionals.name AS professional',
             'COALESCE(users.username, schedules.customer_name) AS user',
-            'schedules.customer_phone',
+            'COALESCE(NULLIF(schedules.customer_phone, ""), users.phone) AS customer_phone',
         ]);
 
         $this->join('units', 'units.id = schedules.unit_id');
@@ -200,7 +202,9 @@ class ScheduleModel extends MyBaseModel
         $this->join('professionals', 'professionals.id = schedules.professional_id', 'left');
         $this->join('users', 'users.id = schedules.user_id', 'left');
         $this->where('schedules.unit_id', $unitId);
-        $this->orderBy('schedules.id', 'DESC');
+        $this->where('schedules.chosen_date >=', date('Y-m-d H:i:s'));
+        $this->orderBy('schedules.chosen_date', 'ASC');
+        $this->orderBy('schedules.id', 'ASC');
 
         return $this->findAll();
     }

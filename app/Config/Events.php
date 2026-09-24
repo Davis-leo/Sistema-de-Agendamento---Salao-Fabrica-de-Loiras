@@ -4,6 +4,7 @@ namespace Config;
 
 use App\Entities\Schedule;
 use App\Notifications\CanceledScheduleNotification;
+use App\Notifications\ConfirmedScheduleNotification;
 use App\Notifications\NewScheduleNotification;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
@@ -75,4 +76,25 @@ Events::on('schedule_canceled', static function (string $email, Schedule $schedu
     
     (new CanceledScheduleNotification(email: $email, schedule: $schedule))-> send();
 
+});
+
+/**
+ * Envia o e-mail de agradecimento após a confirmação do atendimento.
+ */
+Events::on('schedule_confirmed', static function (string $email, Schedule $schedule) {
+    (new ConfirmedScheduleNotification(email: $email, schedule: $schedule))->send();
+});
+
+/**
+ * Persiste o telefone informado no cadastro do Shield.
+ */
+Events::on('register', static function ($user): void {
+    $digits = preg_replace('/\D+/', '', (string) service('request')->getPost('phone'));
+    if (strlen($digits) === 11) {
+        $phone = sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 5), substr($digits, 7));
+    } else {
+        return;
+    }
+
+    model(\App\Models\UserModel::class)->update($user->id, ['phone' => $phone]);
 });

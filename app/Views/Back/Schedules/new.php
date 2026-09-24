@@ -45,6 +45,64 @@
     }
 
     .admin-service-option input { accent-color: var(--salon-rose); }
+
+    #admin-professionals {
+        min-height: 44px;
+    }
+
+    #admin-professionals .professional-group {
+        background: #fffdfb;
+        border: 1px solid rgba(82, 59, 49, .14);
+        border-radius: 8px;
+        margin-bottom: .75rem;
+        padding: .75rem;
+    }
+
+    #admin-professionals .professional-group:last-child { margin-bottom: 0; }
+
+    #admin-professionals .professional-group-title {
+        color: var(--salon-muted);
+        font-size: .75rem;
+        font-weight: 700;
+        margin-bottom: .65rem;
+        text-transform: uppercase;
+    }
+
+    #admin-professionals .professional-group-service {
+        color: var(--salon-ink);
+        margin-left: .35rem;
+        text-transform: none;
+    }
+
+    #admin-professionals .professionals-grid {
+        display: grid;
+        gap: .5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #admin-professionals .professional-choice {
+        background: #fff;
+        border: 1px solid var(--salon-rose);
+        border-radius: 999px;
+        color: var(--salon-rose-dark);
+        cursor: pointer;
+        font: inherit;
+        font-size: .85rem;
+        font-weight: 700;
+        min-height: 40px;
+        padding: .55rem .75rem;
+        transition: background-color .2s ease, color .2s ease;
+    }
+
+    #admin-professionals .professional-choice:hover,
+    #admin-professionals .professional-choice[aria-pressed="true"] {
+        background: var(--salon-rose);
+        color: #fff;
+    }
+
+    @media (max-width: 767.98px) {
+        #admin-professionals .professionals-grid { grid-template-columns: 1fr; }
+    }
 </style>
 <?php echo $this->endSection(); ?>
 
@@ -90,16 +148,6 @@
                     <?php echo show_error_input('unit_id'); ?>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="professional_id">Profissional</label>
-                    <select class="form-control" name="professional_id" id="professional_id" required>
-                        <option value="">Selecione um profissional</option>
-                        <?php foreach ($professionals as $professional): ?>
-                            <option value="<?php echo $professional->id; ?>" <?php echo old('professional_id') == $professional->id ? 'selected' : ''; ?>><?php echo esc($professional->name); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <?php echo show_error_input('professional_id'); ?>
-                </div>
-                <div class="form-group col-md-6">
                     <label>Serviços</label>
                     <div class="admin-services">
                         <?php $oldServiceIds = array_map('intval', (array) old('service_ids')); ?>
@@ -117,6 +165,10 @@
                     <input type="datetime-local" class="form-control" name="chosen_date" id="chosen_date" value="<?php echo old('chosen_date'); ?>" required>
                     <?php echo show_error_input('chosen_date'); ?>
                 </div>
+                <div class="form-group col-md-6">
+                    <label>Profissionais por serviço</label>
+                    <div id="admin-professionals" class="text-muted">Selecione unidade, serviços e horário para carregar as profissionais disponíveis.</div>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary mt-4">Salvar agendamento</button>
@@ -130,4 +182,72 @@
 <?php echo $this->section('js'); ?>
 <script src="<?php echo base_url('back/mask/jquery.mask.min.js'); ?>"></script>
 <script src="<?php echo base_url('back/mask/app.js'); ?>"></script>
+<script>
+    const professionalsUrl = '<?php echo route_to('get.professionals'); ?>';
+    const unitInput = document.getElementById('unit_id');
+    const dateInput = document.getElementById('chosen_date');
+    const professionalsBox = document.getElementById('admin-professionals');
+    const serviceInputs = () => Array.from(document.querySelectorAll('input[name="service_ids[]"]:checked'));
+
+    const loadProfessionals = async () => {
+        const serviceIds = serviceInputs().map(input => input.value);
+        const chosenDate = dateInput.value;
+        if (!unitInput.value || !serviceIds.length || !chosenDate) {
+            professionalsBox.innerHTML = 'Selecione unidade, serviços e horário para carregar as profissionais disponíveis.';
+            return;
+        }
+
+        const [date, hour] = chosenDate.split('T');
+        const [year, month, day] = date.split('-');
+        const params = new URLSearchParams({
+            unit_id: unitInput.value,
+            service_ids: serviceIds.join(','),
+            month,
+            day,
+            hour,
+        });
+        professionalsBox.innerHTML = '<span class="text-info">Carregando profissionais...</span>';
+        const response = await fetch(`${professionalsUrl}?${params}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        if (!response.ok) {
+            professionalsBox.innerHTML = '<div class="alert alert-warning">Não foi possível carregar as profissionais.</div>';
+            return;
+        }
+
+        professionalsBox.innerHTML = (await response.json()).professionals;
+        document.querySelectorAll('#admin-professionals .professional-choice').forEach(button => {
+            button.type = 'button';
+            button.addEventListener('click', () => {
+                const serviceGroupIds = button.dataset.serviceIds.split(',');
+                const selected = Array.from(document.querySelectorAll('input[name^="professional_assignments"]'))
+                    .filter(input => !serviceGroupIds.includes(input.dataset.serviceId))
+                    .map(input => input.value);
+                if (selected.includes(button.dataset.professionalId)) {
+                    alert('Escolha profissionais diferentes para serviços simultâneos.');
+                    return;
+                }
+                serviceGroupIds.forEach(serviceId => {
+                    let input = document.querySelector(`input[name="professional_assignments[${serviceId}]"]`);
+                    if (!input) {
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = `professional_assignments[${serviceId}]`;
+                        input.dataset.serviceId = serviceId;
+                        professionalsBox.appendChild(input);
+                    }
+                    input.value = button.dataset.professionalId;
+                });
+                document.querySelectorAll('#admin-professionals .professional-choice').forEach(option => {
+                    const sameGroup = option.dataset.serviceIds.split(',').some(id => serviceGroupIds.includes(id));
+                    if (sameGroup) option.setAttribute('aria-pressed', option === button ? 'true' : 'false');
+                });
+            });
+        });
+    };
+
+    unitInput.addEventListener('change', loadProfessionals);
+    dateInput.addEventListener('change', loadProfessionals);
+    document.querySelectorAll('input[name="service_ids[]"]').forEach(input => input.addEventListener('change', loadProfessionals));
+</script>
 <?php echo $this->endSection(); ?>

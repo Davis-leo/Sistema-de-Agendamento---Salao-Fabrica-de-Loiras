@@ -44,6 +44,7 @@ class Filters extends BaseFilters
         'group'        => \CodeIgniter\Shield\Filters\GroupFilter::class,
         'permission'   => \CodeIgniter\Shield\Filters\PermissionFilter::class,
         'force-reset'  => \CodeIgniter\Shield\Filters\ForcePasswordResetFilter::class,
+        'profile-completion' => \App\Filters\ProfileCompletionFilter::class,
         'jwt'          => \CodeIgniter\Shield\Filters\JWTAuth::class,
     ];
 

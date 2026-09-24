@@ -9,6 +9,7 @@ use App\Models\ServiceModel;
 use App\Models\UnitModel;
 use App\Models\ProfessionalModel;
 use App\Models\ScheduleServiceModel;
+use CodeIgniter\Shield\Models\UserIdentityModel;
 use App\Libraries\ProfessionalAvailabilityService;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -37,7 +38,7 @@ class SchedulesController extends BaseController
             'customer_email',
             'unit_id',
             'service_ids',
-            'professional_id',
+            'professional_assignments',
             'chosen_date',
         ]);
 
@@ -47,7 +48,6 @@ class SchedulesController extends BaseController
             'customer_email' => 'permit_empty|valid_email|max_length[120]',
             'unit_id'        => 'required|is_natural_no_zero',
             'service_ids'    => 'required',
-            'professional_id'=> 'required|is_natural_no_zero',
             'chosen_date'    => 'required',
         ];
 
@@ -77,16 +77,20 @@ class SchedulesController extends BaseController
             return redirect()->back()->withInput()->with('danger', 'Escolha uma data e horário futuros válidos.');
         }
 
-        $professional = model(ProfessionalModel::class)->where('active', 1)->find($request['professional_id']);
-        if (!$professional || !(new ProfessionalAvailabilityService())->isAvailable((int) $unit->id, (int) $professional->id, $serviceIds, $chosenDate)) {
-            return redirect()->back()->withInput()->with('danger', 'O profissional não está disponível nesse horário.');
+        $assignments = [];
+        foreach ((array) ($request['professional_assignments'] ?? []) as $serviceId => $professionalId) {
+            $assignments[(int) $serviceId] = (int) $professionalId;
         }
+        if (!(new ProfessionalAvailabilityService())->isAvailableForAssignments((int) $unit->id, $serviceIds, $assignments, $chosenDate)) {
+            return redirect()->back()->withInput()->with('danger', 'Escolha uma profissional disponível para cada serviço.');
+        }
+        $primaryProfessionalId = (int) reset($assignments);
 
         $scheduleModel = model(ScheduleModel::class);
         $schedule = new Schedule([
             'unit_id'       => $unit->id,
             'service_id'    => $serviceIds[0],
-            'professional_id'=> $professional->id,
+            'professional_id'=> $primaryProfessionalId,
             'user_id'       => null,
             'customer_name' => $request['customer_name'],
             'customer_phone'=> $request['customer_phone'],
@@ -104,6 +108,7 @@ class SchedulesController extends BaseController
             $scheduleServiceModel->insert([
                 'schedule_id' => $scheduleModel->getInsertID(),
                 'service_id'  => $serviceId,
+                    'professional_id' => $assignments[$serviceId],
             ]);
         }
 
@@ -142,27 +147,189 @@ class SchedulesController extends BaseController
     public function confirm(int $id): RedirectResponse
     {
         $this->checkMethod('post');
-        $amount = (float) $this->request->getPost('service_amount');
-        if ($amount < 0) {
-            return redirect()->back()->with('danger', 'Informe um valor válido para o serviço.');
-        }
         $model = model(ScheduleModel::class);
         $schedule = $model->where('id', $id)->where('canceled', 0)->where('confirmed', 0)->first();
         if (!$schedule) {
             return redirect()->back()->with('danger', 'Este agendamento não pode ser confirmado.');
         }
-        $professional = model(ProfessionalModel::class)->find($schedule->professional_id);
-        if (!$professional) {
-            return redirect()->back()->with('danger', 'O profissional do agendamento não foi encontrado.');
+        $scheduleServiceModel = model(ScheduleServiceModel::class);
+        $scheduleServices = $scheduleServiceModel->where('schedule_id', $id)->findAll();
+        $hasScheduleServiceRows = !empty($scheduleServices);
+        if (empty($scheduleServices)) {
+            $scheduleServices = [['schedule_id' => $id, 'service_id' => $schedule->service_id]];
         }
+
+        $amounts = (array) $this->request->getPost('service_amount');
+        $percentages = (array) $this->request->getPost('commission_percentage');
+        $totalAmount = 0.0;
+        $totalCommission = 0.0;
+        $financialItems = [];
+
+        foreach ($scheduleServices as $item) {
+            $serviceId = (int) $item['service_id'];
+            $professionalId = (int) ($item['professional_id'] ?? $schedule->professional_id);
+            if (!model(ProfessionalModel::class)->where(['id' => $professionalId, 'active' => 1])->first()) {
+                return redirect()->back()->with('danger', 'Uma profissional do agendamento não foi encontrada.');
+            }
+            $amountValue = $amounts[$serviceId] ?? null;
+            $percentageValue = $percentages[$serviceId] ?? null;
+            if (!is_numeric($amountValue) || !is_numeric($percentageValue)) {
+                return redirect()->back()->with('danger', 'Informe o valor e a comissão de todos os serviços.');
+            }
+
+            $amount = (float) $amountValue;
+            $percentage = (float) $percentageValue;
+            if ($amount < 0 || $percentage < 0 || $percentage > 100) {
+                return redirect()->back()->with('danger', 'Informe valores e comissões válidos.');
+            }
+
+            $commission = round($amount * ($percentage / 100), 2);
+            $totalAmount += $amount;
+            $totalCommission += $commission;
+            $financialItems[$serviceId] = [
+                'service_amount' => $amount,
+                'commission_percentage' => $percentage,
+                'commission_amount' => $commission,
+            ];
+        }
+
         $schedule->confirmed = 1;
         $schedule->finished = 1;
-        $schedule->service_amount = $amount;
-        $schedule->commission_percentage = $professional->commission_percentage;
-        $schedule->commission_amount = round($amount * ((float) $professional->commission_percentage / 100), 2);
+        $schedule->service_amount = $totalAmount;
+        $schedule->commission_percentage = $totalAmount > 0 ? round(($totalCommission / $totalAmount) * 100, 2) : 0;
+        $schedule->commission_amount = $totalCommission;
         $schedule->confirmed_at = date('Y-m-d H:i:s');
         $schedule->confirmed_by = auth()->user()->id;
+
+        $db = db_connect();
+        $db->transStart();
+        foreach ($financialItems as $serviceId => $financialItem) {
+            $updated = $scheduleServiceModel
+                ->where('schedule_id', $id)
+                ->where('service_id', $serviceId)
+                ->set($financialItem)
+                ->update();
+            if (!$updated && !$hasScheduleServiceRows) {
+                $scheduleServiceModel->insert(array_merge([
+                    'schedule_id' => $id,
+                    'service_id' => $serviceId,
+                ], $financialItem));
+            }
+        }
         $model->save($schedule);
+        $db->transComplete();
+        if (!$db->transStatus()) {
+            return redirect()->back()->with('danger', 'Não foi possível registrar a confirmação.');
+        }
+
+        $confirmedSchedule = $model->getSchedule($id);
+        $email = $schedule->customer_email;
+        if ($schedule->user_id) {
+            $identity = model(UserIdentityModel::class)
+                ->where(['user_id' => $schedule->user_id, 'type' => 'email_password'])
+                ->first();
+            $email = is_array($identity) ? ($identity['secret'] ?? null) : ($identity?->secret ?? null);
+        }
+        if ($email) {
+            Events::trigger('schedule_confirmed', $email, $confirmedSchedule);
+        }
+
         return redirect()->back()->with('success', 'Atendimento confirmado e comissão registrada.');
+    }
+
+    public function edit(int $id): string|RedirectResponse
+    {
+        $schedule = model(ScheduleModel::class)
+            ->select('schedules.*, users.username AS user')
+            ->join('users', 'users.id = schedules.user_id', 'left')
+            ->where('schedules.id', $id)
+            ->where('schedules.canceled', 0)
+            ->first();
+        if (!$schedule) {
+            return redirect()->back()->with('danger', 'Agendamento não encontrado.');
+        }
+
+        $serviceItems = model(ScheduleServiceModel::class)
+            ->select('schedule_services.*, services.name AS service_name, professionals.name AS professional_name')
+            ->join('services', 'services.id = schedule_services.service_id')
+            ->join('professionals', 'professionals.id = schedule_services.professional_id', 'left')
+            ->where('schedule_services.schedule_id', $id)
+            ->orderBy('services.name', 'ASC')
+            ->findAll();
+        if (!$serviceItems) {
+            $serviceItems = [[
+                'service_id' => $schedule->service_id,
+                'service_name' => 'Serviço principal',
+                'professional_name' => $schedule->professional,
+                'service_amount' => $schedule->service_amount,
+                'commission_percentage' => $schedule->commission_percentage,
+            ]];
+        }
+
+        return view('Back/Schedules/edit', [
+            'title' => 'Editar agendamento',
+            'schedule' => $schedule,
+            'serviceItems' => $serviceItems,
+        ]);
+    }
+
+    public function update(int $id): RedirectResponse
+    {
+        $this->checkMethod('post');
+        $model = model(ScheduleModel::class);
+        $schedule = $model->where('id', $id)->where('canceled', 0)->first();
+        if (!$schedule) {
+            return redirect()->back()->with('danger', 'Agendamento não encontrado.');
+        }
+
+        $scheduleServiceModel = model(ScheduleServiceModel::class);
+        $items = $scheduleServiceModel->where('schedule_id', $id)->findAll();
+        if (!$items) {
+            $items = [['service_id' => $schedule->service_id]];
+        }
+        $amounts = (array) $this->request->getPost('service_amount');
+        $percentages = (array) $this->request->getPost('commission_percentage');
+        $totalAmount = 0.0;
+        $totalCommission = 0.0;
+        $financialItems = [];
+
+        foreach ($items as $item) {
+            $serviceId = (int) $item['service_id'];
+            if (!is_numeric($amounts[$serviceId] ?? null) || !is_numeric($percentages[$serviceId] ?? null)) {
+                return redirect()->back()->withInput()->with('danger', 'Informe valores e comissões válidos para todos os serviços.');
+            }
+            $amount = (float) $amounts[$serviceId];
+            $percentage = (float) $percentages[$serviceId];
+            if ($amount < 0 || $percentage < 0 || $percentage > 100) {
+                return redirect()->back()->withInput()->with('danger', 'Informe valores e comissões válidos.');
+            }
+            $commission = round($amount * ($percentage / 100), 2);
+            $totalAmount += $amount;
+            $totalCommission += $commission;
+            $financialItems[$serviceId] = [
+                'service_amount' => $amount,
+                'commission_percentage' => $percentage,
+                'commission_amount' => $commission,
+            ];
+        }
+
+        $schedule->service_amount = $totalAmount;
+        $schedule->commission_percentage = $totalAmount > 0 ? round(($totalCommission / $totalAmount) * 100, 2) : 0;
+        $schedule->commission_amount = $totalCommission;
+        $db = db_connect();
+        $db->transStart();
+        foreach ($financialItems as $serviceId => $financialItem) {
+            $updated = $scheduleServiceModel->where('schedule_id', $id)->where('service_id', $serviceId)->set($financialItem)->update();
+            if (!$updated && count($items) === 1 && (int) $items[0]['service_id'] === $serviceId) {
+                $scheduleServiceModel->insert(array_merge(['schedule_id' => $id, 'service_id' => $serviceId], $financialItem));
+            }
+        }
+        $model->save($schedule);
+        $db->transComplete();
+        if (!$db->transStatus()) {
+            return redirect()->back()->withInput()->with('danger', 'Não foi possível atualizar o agendamento.');
+        }
+
+        return redirect()->back()->with('success', 'Agendamento atualizado com sucesso.');
     }
 }

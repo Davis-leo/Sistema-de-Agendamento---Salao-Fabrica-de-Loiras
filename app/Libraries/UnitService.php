@@ -4,6 +4,7 @@ namespace App\Libraries;
 
 use App\Entities\Unit;
 use App\Models\ScheduleModel;
+use App\Models\ScheduleServiceModel;
 use App\Models\UnitModel;
 use CodeIgniter\Config\Factories;
 
@@ -91,14 +92,36 @@ class UnitService extends MyBaseService
 
         foreach($schedules as $schedule){
 
+            $serviceItems = model(ScheduleServiceModel::class)
+                ->select('schedule_services.service_id, services.name AS service_name, assigned_professionals.name AS professional_name')
+                ->join('services', 'services.id = schedule_services.service_id')
+                ->join('professionals AS assigned_professionals', 'assigned_professionals.id = schedule_services.professional_id', 'left')
+                ->where('schedule_services.schedule_id', $schedule->id)
+                ->orderBy('services.name', 'ASC')
+                ->findAll();
+            if (empty($serviceItems)) {
+                $serviceItems = [[
+                    'service_id' => $schedule->service_id,
+                    'service_name' => $schedule->service,
+                    'professional_name' => $schedule->professional,
+                ]];
+            }
+
             $list[] = "<p>
                             <strong>Unidade:  </strong>{$schedule->unit}        <br>
                             <strong>Endereço: </strong>{$schedule->address}     <br>
-                            <strong>Serviço:  </strong>{$schedule->service}     <br>
-                            <strong>Profissional: </strong>{$schedule->professional} <br>
+                            <strong>Serviço e profissional: </strong>{$schedule->service_professionals} <br>
                             <strong>Situação: </strong>{$schedule->situation()} <br>
                            <strong>Cliente:  </strong>{$schedule->user}        <br>
                             <strong>Telefone: </strong>{$schedule->customer_phone} <br>";
+
+            if (!$schedule->canceled) {
+                $list[count($list) - 1] .= anchor(
+                    route_to('super.schedules.edit', $schedule->id),
+                    'Editar agendamento',
+                    ['class' => 'btn btn-sm btn-outline-secondary mt-2 mr-2']
+                );
+            }
 
             if (!$schedule->canceled && !$schedule->finished) {
 
@@ -120,7 +143,12 @@ class UnitService extends MyBaseService
 
             if (!$schedule->canceled && !$schedule->confirmed) {
                 $list[count($list) - 1] .= form_open(route_to('super.schedules.confirm', $schedule->id), ['class' => 'd-inline ml-2']);
-                $list[count($list) - 1] .= '<input type="number" name="service_amount" min="0" step="0.01" class="form-control form-control-sm d-inline-block" style="max-width:130px" placeholder="Valor" required>';
+                foreach ($serviceItems as $serviceItem) {
+                    $professionalName = $serviceItem['professional_name'] ?: ($schedule->professional ?: 'Profissional não definida');
+                    $list[count($list) - 1] .= '<div class="mb-2"><strong>' . esc($serviceItem['service_name']) . ' - ' . esc($professionalName) . '</strong><br>'
+                        . '<input type="number" name="service_amount[' . (int) $serviceItem['service_id'] . ']" min="0" step="0.01" class="form-control form-control-sm d-inline-block" style="max-width:130px" placeholder="Valor" required> '
+                        . '<input type="number" name="commission_percentage[' . (int) $serviceItem['service_id'] . ']" min="0" max="100" step="0.01" class="form-control form-control-sm d-inline-block" style="max-width:130px" placeholder="Comissão %" required></div>';
+                }
                 $list[count($list) - 1] .= form_button(['class' => 'btn btn-sm btn-primary mt-2', 'type' => 'submit', 'content' => 'Confirmar atendimento']);
                 $list[count($list) - 1] .= form_close();
             }

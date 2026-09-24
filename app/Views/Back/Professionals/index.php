@@ -12,12 +12,11 @@
                 <p class="text-muted">Nenhum profissional cadastrado.</p>
             <?php else: ?>
                 <div class="table-responsive"><table class="table">
-                    <thead><tr><th>Nome</th><th>Unidade</th><th>Comissão</th><th>Status</th><th>Ações</th></tr></thead>
+                    <thead><tr><th>Nome</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead>
                     <tbody><?php foreach ($professionals as $professional): ?>
                         <tr>
                             <td><?php echo esc($professional->name); ?></td>
                             <td><?php echo esc($unitsById[$professional->unit_id] ?? 'Não definida'); ?></td>
-                            <td><?php echo number_format($professional->commission_percentage, 0, ',', '.'); ?>%</td>
                             <td><?php echo $professional->status(); ?></td>
                             <td>
                                 <a class="btn btn-sm btn-outline-primary" href="<?php echo route_to('professionals.edit', $professional->id); ?>">Editar</a>

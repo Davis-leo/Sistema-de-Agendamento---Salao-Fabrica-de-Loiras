@@ -24,13 +24,14 @@ class ServiceService extends MyBaseService
             return self::TEXT_FOR_NO_DATA;
         }
 
-        $this->htmlTable->setHeading('Ações', 'Nome', 'Situação', 'Criado');
+        $this->htmlTable->setHeading('Ações', 'Nome', 'Grupo', 'Situação', 'Criado');
 
         foreach ($services as $service) {
 
             $this->htmlTable->addRow([
                 $this->renderBtnActions($service),
                 $service->name,
+                $service->service_group,
                 $service->status(),
                 $service->createdAt(),
             ]);

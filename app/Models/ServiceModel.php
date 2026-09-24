@@ -14,6 +14,7 @@ class ServiceModel extends MyBaseModel
     protected $protectFields    = true;
     protected $allowedFields    = [
         'name',
+        'service_group',
         'active',      
     ];
 
@@ -33,12 +34,17 @@ class ServiceModel extends MyBaseModel
     protected $validationRules      = [
         'id'            => 'permit_empty|is_natural_no_zero',
         'name'          => 'required|max_length[69]|is_unique[services.name,id,{id}]',
+        'service_group' => 'required|max_length[70]',
     ];
     protected $validationMessages   = [
         'name' => [
             'required'      => 'O Nome é obrigatório.',
             'max_length'    => 'O Nome deve ter no máximo 69 caracteres.',
             'is_unique'     => 'O Nome deve ser único. Já existe um serviço com este nome.'
+        ],
+        'service_group' => [
+            'required' => 'O grupo do serviço é obrigatório.',
+            'max_length' => 'O grupo do serviço deve ter no máximo 70 caracteres.',
         ],
     ];
     protected $skipValidation       = false;

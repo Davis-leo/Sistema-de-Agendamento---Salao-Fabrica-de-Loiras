@@ -68,11 +68,10 @@ class UnitAvaiableHoursService
             // Precorro os horários gerados
             foreach($timeRange as $hour){
                 $chosenDate = $dateWanted . ' ' . $hour;
-                $availableProfessionals = !empty($serviceIds)
-                    ? (new ProfessionalAvailabilityService())->availableForSlot((int) $unit->id, $serviceIds, $chosenDate)
-                    : [];
+                $hasAvailableAssignment = !empty($serviceIds)
+                    && (new ProfessionalAvailabilityService())->hasAvailableAssignment((int) $unit->id, $serviceIds, $chosenDate);
 
-                if(!empty($availableProfessionals)){
+                if($hasAvailableAssignment){
 
                     $hasAvailableHour = true;
                     $divHours .= form_button(data: ['class' => 'btn btn-hour btn-primary', 'data-hour' => $hour], content: $hour);
@@ -84,7 +83,7 @@ class UnitAvaiableHoursService
             $divHours .= '</div>';
 
             if (!$hasAvailableHour) {
-                return '<div class="alert alert-info">Não há profissionais disponíveis para este serviço neste dia. Cadastre um profissional, associe o serviço e defina o horário de trabalho.</div>';
+                return '<div class="alert alert-info">Não há profissionais disponíveis para este serviço neste dia. Em caso de dúvidas, entre em contato conosco.</div>';
             }
 
             // Finalmente retornamos o range de horários

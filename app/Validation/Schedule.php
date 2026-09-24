@@ -25,12 +25,10 @@ class Schedule
                 ],
             ],
 
-            'professional_id' => [
-                'rules'  => 'required|is_natural_no_zero|is_not_unique[professionals.id]',
+            'professional_assignments' => [
+                'rules'  => 'required',
                 'errors' => [
-                    'required'           => 'Escolha um profissional',
-                    'is_natural_no_zero' => 'Profissional inválido',
-                    'is_not_unique'      => 'Profissional inválido',
+                    'required' => 'Escolha uma profissional para cada grupo de serviço',
                 ],
             ],
 

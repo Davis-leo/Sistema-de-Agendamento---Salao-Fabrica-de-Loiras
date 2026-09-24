@@ -233,6 +233,42 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    #professionals .professional-group {
+        background: rgba(255, 255, 255, .52);
+        border: 1px solid var(--salon-line);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        padding: .85rem 1rem 1rem;
+    }
+
+    #professionals .professional-group:last-child { margin-bottom: 0; }
+
+    #professionals .professional-group-title {
+        align-items: baseline;
+        border-bottom: 1px solid var(--salon-line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem .65rem;
+        margin-bottom: .75rem;
+        padding-bottom: .65rem;
+    }
+
+    #professionals .professional-group-kicker {
+        color: var(--salon-muted);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+
+    #professionals .professional-group-service {
+        color: var(--salon-ink);
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
     #professionals .professional-choice {
         background: #fff;
         border: 1px solid var(--salon-rose);
@@ -402,7 +438,7 @@
                         </div>
 
                         <div id="boxProfessionals" class="col-md-12 form-group d-none">
-                            <p class="lead">Escolha o profissional</p>
+                            <p class="lead">Escolha uma profissional para cada grupo de serviço</p>
                             <div id="professionals"></div>
                         </div>
 
@@ -482,7 +518,7 @@
     let chosenMonth = null;
     let chosenDay = null;
     let chosenHour = null;
-    let professionalId = null;
+    let professionalAssignments = {};
 
     // CSRF CODE PARA ENVIAR NO REQUEST
     let csrfTokenName = '<?php echo csrf_token(); ?>'
@@ -638,8 +674,8 @@
             return;
         }
 
-        if (!professionalId) {
-            boxErrors.innerHTML = showErrorMessage('Escolha o profissional');
+        if (Object.keys(professionalAssignments).length !== serviceIds.length) {
+            boxErrors.innerHTML = showErrorMessage('Escolha uma profissional para cada serviço');
             return;
         }
 
@@ -666,7 +702,7 @@
             month: chosenMonth,
             day: chosenDay,
             hour: chosenHour,
-            professional_id: parseInt(professionalId)
+            professional_assignments: professionalAssignments
         };
 
         body[csrfTokenName] = csrfTokenValue;
@@ -856,7 +892,7 @@
 
                 // Armazenamos na variável global
                 chosenHour = event.target.dataset.hour;
-                professionalId = null;
+                professionalAssignments = {};
                 boxProfessionals.classList.remove('d-none');
                 professionals.innerHTML = '<span class="text-info">Carregando profissionais...</span>';
                 getProfessionals();
@@ -885,11 +921,19 @@
         professionals.innerHTML = (await response.json()).professionals;
         document.querySelectorAll('.professional-choice').forEach(button => {
             button.addEventListener('click', () => {
-                document.querySelectorAll('.professional-choice').forEach(option => {
-                    option.setAttribute('aria-pressed', 'false');
+                const serviceGroupIds = button.dataset.serviceIds.split(',').map(Number);
+                const professionalId = button.dataset.professionalId;
+                const otherAssignments = Object.entries(professionalAssignments)
+                    .filter(([serviceId]) => !serviceGroupIds.includes(Number(serviceId)))
+                    .map(([, assignedId]) => assignedId);
+                if (otherAssignments.includes(professionalId)) {
+                    boxErrors.innerHTML = showErrorMessage('Escolha profissionais diferentes para serviços simultâneos.');
+                    return;
+                }
+                serviceGroupIds.forEach(serviceId => professionalAssignments[serviceId] = professionalId);
+                button.closest('.professional-group').querySelectorAll('.professional-choice').forEach(option => {
+                    option.setAttribute('aria-pressed', option === button ? 'true' : 'false');
                 });
-                button.setAttribute('aria-pressed', 'true');
-                professionalId = button.dataset.professionalId;
             });
         });
     };
@@ -930,7 +974,7 @@
         boxHours.innerHTML = '';
         boxProfessionals.classList.add('d-none');
         professionals.innerHTML = '';
-        professionalId = null;
+        professionalAssignments = {};
     }
 
     // Remove a classe do array de elementos

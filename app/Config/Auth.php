@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Config;
 
+use App\Authentication\Actions\EmailActivator;
 use CodeIgniter\Shield\Config\Auth as ShieldAuth;
 use CodeIgniter\Shield\Authentication\Actions\ActionInterface;
 use CodeIgniter\Shield\Authentication\AuthenticatorInterface;
@@ -25,7 +26,7 @@ use CodeIgniter\Shield\Authentication\Passwords\DictionaryValidator;
 use CodeIgniter\Shield\Authentication\Passwords\NothingPersonalValidator;
 use CodeIgniter\Shield\Authentication\Passwords\PwnedValidator;
 use CodeIgniter\Shield\Authentication\Passwords\ValidatorInterface;
-use CodeIgniter\Shield\Models\UserModel;
+use App\Models\UserModel;
 
 class Auth extends ShieldAuth
 {
@@ -74,9 +75,9 @@ class Auth extends ShieldAuth
      * to apply any logic you may need.
      */
     public array $redirects = [
-        'register'          => 'schedules',
-        'login'             => 'schedules',
-        'logout'            => '/',
+        'register'          => '/',
+        'login'             => '/',
+        'logout'            => 'login',
         'force_reset'       => '/',
         'permission_denied' => '/',
         'group_denied'      => '/',
@@ -104,7 +105,7 @@ class Auth extends ShieldAuth
      * @var array<string, class-string<ActionInterface>|null>
      */
     public array $actions = [
-        'register' => \App\Authentication\Actions\EmailActivator::class,
+        'register' => EmailActivator::class,
         'login'    => null,
     ];
 
@@ -229,7 +230,7 @@ class Auth extends ShieldAuth
             'required',
             'max_length[30]',
             'min_length[3]',
-            'regex_match[/\A[a-zA-Z0-9\.]+\z/]',
+            'regex_match[/\A[\p{L}\p{N}]+(?:[ .\x{27}-][\p{L}\p{N}]+)*\z/u]',
         ],
     ];
 

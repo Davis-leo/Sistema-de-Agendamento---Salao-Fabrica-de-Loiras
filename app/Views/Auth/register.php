@@ -25,8 +25,10 @@
                         <ul class="auth-error-list">
                             <?php foreach (session('errors') as $error) : ?>
                                 <?php $errorMessage = match ($error) {
-                                    'The Username field is not in the correct format.' => 'O nome de usuário deve ter entre 3 e 30 caracteres e conter apenas letras, números e ponto, sem espaços ou acentos.',
+                                    'The Username field is not in the correct format.' => 'O nome deve ter entre 3 e 30 caracteres e conter apenas letras, números, espaços, hífen ou apóstrofo.',
                                     'The Username field must contain a unique value.' => 'Esse nome de usuário já está sendo usado. Escolha outro nome.',
+                                    'The Email field must contain a unique value.' => 'Esse endereço de e-mail já está cadastrado. Use outro e-mail.',
+                                    'The email field must contain a unique value.' => 'Esse endereço de e-mail já está cadastrado. Use outro e-mail.',
                                     'Passwords must be at least 8 characters long.' => 'As senhas devem ter pelo menos 8 caracteres.',
                                     'Password must not be a common password.' => 'A senha deve ter pelo menos 8 caracteres, não pode ser uma senha comum e não deve conter seu nome de usuário ou e-mail.',
                                     'The Password (again) field does not match the Password field.' => 'As senhas não coincidem. Digite a mesma senha nos dois campos.',
@@ -55,6 +57,11 @@
                 </div>
 
                 <div class="field">
+                    <label for="phone">Telefone</label>
+                    <input type="tel" id="phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="<?= old('phone') ?>" maxlength="15" required>
+                </div>
+
+                <div class="field">
                     <label for="password">Senha</label>
                     <input type="password" id="password" name="password" inputmode="text" autocomplete="new-password" placeholder="Crie uma senha" required>
                 </div>
@@ -72,4 +79,19 @@
             </form>
         </div>
     </section>
+    <script>
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', () => {
+            const digits = phoneInput.value.replace(/\D/g, '').slice(0, 11);
+            if (digits.length <= 10) {
+                phoneInput.value = digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_, area, first, last) =>
+                    '(' + area + (first ? ') ' + first : '') + (last ? '-' + last : '')
+                );
+            } else {
+                phoneInput.value = digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_, area, first, last) =>
+                    '(' + area + (first ? ') ' + first : '') + (last ? '-' + last : '')
+                );
+            }
+        });
+    </script>
 <?= $this->endSection() ?>

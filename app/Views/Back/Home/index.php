@@ -290,8 +290,8 @@
                     <div class="schedule-row">
                         <div class="schedule-time"><?php echo esc($schedule->formated_chosen_date); ?></div>
                         <div>
-                            <div class="schedule-service"><?php echo esc($schedule->service); ?></div>
-                            <div class="schedule-meta"><?php echo esc($schedule->unit); ?> · <?php echo esc($schedule->professional ?: 'Profissional não definido'); ?></div>
+                            <div class="schedule-service"><?php echo esc($schedule->service_professionals ?: $schedule->service); ?></div>
+                            <div class="schedule-meta"><?php echo esc($schedule->unit); ?></div>
                         </div>
                         <div class="schedule-user"><?php echo esc($schedule->user); ?></div>
                     </div>

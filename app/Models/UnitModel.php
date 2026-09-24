@@ -57,7 +57,7 @@ class UnitModel extends MyBaseModel
         ],
         'phone' => [
             'required'      => 'O Telefone é obrigatório.',
-            'exact_length'  => 'O Telefone deve ter exatamente 15 caracteres.',
+            'exact_length'  => 'O Telefone deve ter 11 dígitos.',
             'is_unique'     => 'O Telefone deve ser único. Já existe uma unidade com este telefone.'
         ],
         'email' => [

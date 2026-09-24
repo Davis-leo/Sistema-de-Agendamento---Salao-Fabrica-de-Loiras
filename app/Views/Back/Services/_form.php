@@ -5,6 +5,13 @@
             aria-describedby="nameHelp" placeholder="Nome">
         <?php echo show_error_input('name') ?>
     </div>
+
+    <div class="form-group col-md-12">
+        <label for="service_group">Grupo do serviço</label>
+        <input type="text" class="form-control" name="service_group" value="<?php echo old('service_group', $service->service_group ?: 'Geral'); ?>" id="service_group" placeholder="Ex.: Cabelo, Unhas" required>
+        <small class="form-text text-muted">Serviços do mesmo grupo precisam ser realizados pela mesma profissional.</small>
+        <?php echo show_error_input('service_group') ?>
+    </div>
     
     <div class="col-md-12 mb-3 mt-4">
 

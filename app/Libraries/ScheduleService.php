@@ -131,15 +131,21 @@ class ScheduleService
                 return 'A unidade ou o serviço selecionado não está disponível';
             }
 
-            if (empty($request->professional_id) || !$this->availabilityService->isAvailable((int) $request->unit_id, (int) $request->professional_id, $serviceIds, $chosenDate)) {
+            $assignments = [];
+            foreach ((array) ($request->professional_assignments ?? []) as $serviceId => $professionalId) {
+                $assignments[(int) $serviceId] = (int) $professionalId;
+            }
+            if (!$this->availabilityService->isAvailableForAssignments((int) $request->unit_id, $serviceIds, $assignments, $chosenDate)) {
 
                 return "O profissional escolhido não está mais disponível nesse horário";
             }
 
+            $primaryProfessionalId = (int) reset($assignments);
+
             $schedule = new Schedule([
                 'unit_id'     => $request->unit_id,
                 'service_id'  => $serviceIds[0],
-                'professional_id' => $request->professional_id,
+                'professional_id' => $primaryProfessionalId,
                 'chosen_date' => $chosenDate,
             ]);
 
@@ -156,6 +162,7 @@ class ScheduleService
                 $scheduleServiceModel->insert([
                     'schedule_id' => $createdId,
                     'service_id'  => $serviceId,
+                    'professional_id' => $assignments[$serviceId],
                 ]);
             }
 

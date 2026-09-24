@@ -11,9 +11,6 @@ $method = $isEdit ? 'PUT' : 'POST';
 <div class="row">
     <div class="form-group col-md-6"><label for="name">Nome</label><input class="form-control" id="name" name="name" value="<?php echo old('name', $professional->name); ?>" required></div>
     <div class="form-group col-md-6"><label for="unit_id">Unidade</label><select class="form-control" id="unit_id" name="unit_id" required><option value="">Selecione uma unidade</option><?php foreach ($units as $unit): ?><option value="<?php echo $unit->id; ?>" <?php echo old('unit_id', $professional->unit_id) == $unit->id ? 'selected' : ''; ?>><?php echo esc($unit->name); ?></option><?php endforeach; ?></select><?php echo show_error_input('unit_id'); ?></div>
-    <div class="form-group col-md-3"><label for="commission_percentage">Comissão</label><select class="form-control" id="commission_percentage" name="commission_percentage" required>
-        <?php foreach ($commissionOptions as $option): ?><option value="<?php echo $option; ?>" <?php echo old('commission_percentage', $professional->commission_percentage ?: 30) == $option ? 'selected' : ''; ?>><?php echo $option; ?>%</option><?php endforeach; ?>
-    </select></div>
     <div class="form-group col-md-3"><label>Status</label><select class="form-control" name="active"><option value="1" <?php echo old('active', $professional->active ?? 1) ? 'selected' : ''; ?>>Ativo</option><option value="0" <?php echo !old('active', $professional->active ?? 1) ? 'selected' : ''; ?>>Inativo</option></select></div>
 </div>
 <hr><h5>Serviços executados</h5><div class="row">
